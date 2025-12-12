@@ -793,47 +793,62 @@ const Admin = () => {
             <h2 className="text-2xl font-bold text-black mb-6">Create New Event</h2>
             
             <form onSubmit={handleCreateEvent} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Event Name"
-                value={newEvent.name}
-                onChange={(e) => setNewEvent({...newEvent, name: e.target.value})}
-                className="input-field"
-                required
-              />
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Event Name"
+                  value={newEvent.name}
+                  onChange={(e) => setNewEvent({...newEvent, name: e.target.value})}
+                  className="input-field pl-10"
+                  required
+                />
+              </div>
               
-              <input
-                type="date"
-                value={newEvent.date}
-                onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
-                className="input-field"
-                required
-              />
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="date"
+                  value={newEvent.date}
+                  onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                  className="input-field pl-10"
+                  required
+                />
+              </div>
               
-              <input
-                type="time"
-                value={newEvent.time}
-                onChange={(e) => setNewEvent({...newEvent, time: e.target.value})}
-                className="input-field"
-                required
-              />
+              <div className="relative">
+                <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="time"
+                  value={newEvent.time}
+                  onChange={(e) => setNewEvent({...newEvent, time: e.target.value})}
+                  className="input-field pl-10"
+                  required
+                />
+              </div>
               
-              <input
-                type="text"
-                placeholder="Venue"
-                value={newEvent.venue}
-                onChange={(e) => setNewEvent({...newEvent, venue: e.target.value})}
-                className="input-field"
-                required
-              />
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Venue"
+                  value={newEvent.venue}
+                  onChange={(e) => setNewEvent({...newEvent, venue: e.target.value})}
+                  className="input-field pl-10"
+                  required
+                />
+              </div>
               
-              <textarea
-                placeholder="Description"
-                value={newEvent.description}
-                onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
-                className="input-field h-24 resize-none"
-                required
-              />
+              <div className="relative">
+                <Building className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
+                <textarea
+                  placeholder="Description"
+                  value={newEvent.description}
+                  onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
+                  className="input-field pl-10 pt-3 h-24 resize-none"
+                  required
+                />
+              </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

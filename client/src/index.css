@@ -139,6 +139,21 @@ body {
   color: hsl(var(--foreground));
 }
 
+.input-field.pl-10 {
+  padding-left: 2.75rem; /* 44px - enough space for icon + padding */
+}
+
+/* Special handling for textarea with icons */
+textarea.input-field.pl-10 {
+  padding-left: 2.75rem;
+  padding-top: 0.75rem; /* 12px */
+}
+
+/* For textareas with pt-3 class */
+textarea.input-field.pl-10.pt-3 {
+  padding-top: 0.75rem; /* Override pt-3 for consistency */
+}
+
 .input-field::placeholder {
   color: #374151;
 }
@@ -147,6 +162,33 @@ body {
   outline: none;
   border-color: hsl(var(--brand-blue));
   box-shadow: 0 0 0 3px hsl(var(--brand-blue) / 0.1);
+}
+
+/* Icon positioning for forms */
+.relative .lucide {
+  pointer-events: none; /* Prevent icon from interfering with input */
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 640px) {
+  .input-field.pl-10 {
+    padding-left: 2.5rem; /* 40px for smaller screens */
+  }
+  
+  textarea.input-field.pl-10 {
+    padding-left: 2.5rem;
+  }
+}
+
+/* Ensure proper spacing for all form inputs with icons */
+@media (min-width: 768px) {
+  .input-field.pl-10 {
+    padding-left: 3rem; /* 48px for larger screens */
+  }
+  
+  textarea.input-field.pl-10 {
+    padding-left: 3rem;
+  }
 }
 
 .text-blue {

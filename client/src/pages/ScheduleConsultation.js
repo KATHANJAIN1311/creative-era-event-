@@ -44,11 +44,11 @@ const ScheduleConsultation = () => {
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
         <div className="card-premium rounded-2xl p-12">
           <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6" />
-          <h1 className="text-3xl font-bold text-white mb-4">Thank You!</h1>
-          <p className="text-white/70 text-lg mb-6">
+          <h1 className="text-3xl font-bold text-navy-900 mb-4">Thank You!</h1>
+          <p className="text-gray-700 text-lg mb-6">
             Your consultation request has been submitted successfully. Our team will contact you within 24 hours.
           </p>
-          <p className="text-white/50">Redirecting to Corporate page...</p>
+          <p className="text-gray-600">Redirecting to Corporate page...</p>
         </div>
       </div>
     );
@@ -57,8 +57,8 @@ const ScheduleConsultation = () => {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-white mb-4">Schedule a Consultation</h1>
-        <p className="text-white/70 text-lg">
+        <h1 className="text-4xl font-bold text-navy-900 mb-4">Schedule a Consultation</h1>
+        <p className="text-gray-700 text-lg">
           Let's discuss how we can make your next corporate event exceptional
         </p>
       </div>
@@ -66,11 +66,11 @@ const ScheduleConsultation = () => {
       <div className="card-premium rounded-2xl p-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-white font-medium mb-2">
+            <label className="block text-navy-900 font-medium mb-2">
               Company Name
             </label>
             <div className="relative">
-              <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 w-5 h-5" />
+              <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
               <input
                 type="text"
                 name="company"
@@ -84,11 +84,11 @@ const ScheduleConsultation = () => {
           </div>
 
           <div>
-            <label className="block text-white font-medium mb-2">
+            <label className="block text-navy-900 font-medium mb-2">
               Contact Person
             </label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 w-5 h-5" />
+              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
               <input
                 type="text"
                 name="contact"
@@ -102,11 +102,11 @@ const ScheduleConsultation = () => {
           </div>
 
           <div>
-            <label className="block text-white font-medium mb-2">
+            <label className="block text-navy-900 font-medium mb-2">
               Email Address
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 w-5 h-5" />
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
               <input
                 type="email"
                 name="email"
@@ -120,11 +120,11 @@ const ScheduleConsultation = () => {
           </div>
 
           <div>
-            <label className="block text-white font-medium mb-2">
+            <label className="block text-navy-900 font-medium mb-2">
               Phone Number
             </label>
             <div className="relative">
-              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 w-5 h-5" />
+              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
               <input
                 type="tel"
                 name="phone"
@@ -138,11 +138,11 @@ const ScheduleConsultation = () => {
           </div>
 
           <div>
-            <label className="block text-white font-medium mb-2">
+            <label className="block text-navy-900 font-medium mb-2">
               Brief Requirements
             </label>
             <div className="relative">
-              <FileText className="absolute left-3 top-3 text-white/40 w-5 h-5" />
+              <FileText className="absolute left-3 top-3 text-gray-500 w-5 h-5" />
               <textarea
                 name="requirements"
                 value={formData.requirements}

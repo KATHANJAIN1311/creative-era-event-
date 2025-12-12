@@ -311,10 +311,10 @@ const Home = () => {
             <div className="w-16 h-16 gold-gradient rounded-2xl flex items-center justify-center mx-auto mb-6">
               <Calendar className="w-8 h-8 text-black" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-4">
+            <h3 className="text-2xl font-bold text-navy-900 mb-4">
               Event Registration
             </h3>
-            <p className="text-white/60 leading-relaxed">
+            <p className="text-gray-700 leading-relaxed">
               Seamless online registration with automated QR generation and instant WhatsApp confirmations
             </p>
           </div>
@@ -323,10 +323,10 @@ const Home = () => {
             <div className="w-16 h-16 gold-gradient rounded-2xl flex items-center justify-center mx-auto mb-6">
               <QrCode className="w-8 h-8 text-black" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-4">
+            <h3 className="text-2xl font-bold text-navy-900 mb-4">
               Smart Check-in
             </h3>
-            <p className="text-white/60 leading-relaxed">
+            <p className="text-gray-700 leading-relaxed">
               Lightning-fast QR code verification with real-time analytics and contactless entry
             </p>
           </div>
@@ -335,10 +335,10 @@ const Home = () => {
             <div className="w-16 h-16 gold-gradient rounded-2xl flex items-center justify-center mx-auto mb-6">
               <Zap className="w-8 h-8 text-black" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-4">
+            <h3 className="text-2xl font-bold text-navy-900 mb-4">
               Live Analytics
             </h3>
-            <p className="text-white/60 leading-relaxed">
+            <p className="text-gray-700 leading-relaxed">
               Real-time dashboards with attendance tracking, engagement metrics, and detailed reports
             </p>
           </div>
@@ -348,10 +348,10 @@ const Home = () => {
       {/* Upcoming Events */}
       <div className="py-20 max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center mb-12">
-          <h2 className="text-4xl font-bold text-white">Featured Events</h2>
+          <h2 className="text-4xl font-bold text-black">Featured Events</h2>
           <Link
             to="/events"
-            className="text-gold hover:text-yellow-300 font-medium flex items-center transition-colors"
+            className="text-blue-600 hover:text-blue-800 font-medium flex items-center transition-colors"
           >
             View All Events
             <ArrowRight className="w-5 h-5 ml-2" />
@@ -380,9 +380,9 @@ const Home = () => {
           </div>
         ) : (
           <div className="text-center py-20">
-            <Calendar className="w-20 h-20 text-white/20 mx-auto mb-6" />
-            <h3 className="text-2xl font-semibold text-white mb-4">No Events Yet</h3>
-            <p className="text-white/60 mb-8">Create your first event to get started.</p>
+            <Calendar className="w-20 h-20 text-gray-400 mx-auto mb-6" />
+            <h3 className="text-2xl font-semibold text-black mb-4">No Events Yet</h3>
+            <p className="text-gray-600 mb-8">Create your first event to get started.</p>
             <Link to="/admin" className="btn-primary">
               Create Event
             </Link>
