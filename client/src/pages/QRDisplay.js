@@ -16,9 +16,12 @@ const QRDisplay = () => {
 
   const fetchRegistration = async () => {
     try {
+      console.log('Fetching registration with ID:', registrationId);
       const response = await registrationsAPI.getById(registrationId);
+      console.log('Registration response:', response);
       setRegistration(response.data);
     } catch (error) {
+      console.error('Registration fetch error:', error);
       setError('Registration not found');
     } finally {
       setLoading(false);
@@ -75,7 +78,7 @@ const QRDisplay = () => {
           </div>
           <div className="text-sm text-gray-600 space-y-1">
             <p>Email: {registration.email}</p>
-            <p>Phone: {registration.phone}</p>
+            <p>Phone: {registration.phone || registration.phoneNumber}</p>
             <p>Registration ID: {registration.registrationId}</p>
             {registration.isCheckedIn && (
               <p className="text-green-600 font-medium">✓ Checked In</p>
@@ -85,12 +88,16 @@ const QRDisplay = () => {
 
         {/* QR Code */}
         <div className="bg-white p-6 rounded-lg border-2 border-gray-200 mb-6 inline-block">
-          <QRCodeSVG
-            value={`${registration.registrationId}|${registration.eventId}`}
-            size={200}
-            level="H"
-            includeMargin={true}
-          />
+          {registration.qrCode ? (
+            <img src={registration.qrCode} alt="QR Code" className="w-48 h-48" />
+          ) : (
+            <QRCodeSVG
+              value={`${registration.registrationId}|${registration.eventId}`}
+              size={200}
+              level="H"
+              includeMargin={true}
+            />
+          )}
         </div>
 
         <div className="bg-blue-50 p-4 rounded-lg">

@@ -62,7 +62,7 @@ router.post('/', async (req, res) => {
     
     // Send email with QR code using secure connection
     try {
-      const transporter = nodemailer.createTransporter({
+      const transporter = nodemailer.createTransport({
         service: 'gmail',
         secure: true, // Use TLS
         auth: {
@@ -107,7 +107,10 @@ router.post('/', async (req, res) => {
     
     res.status(201).json({
       message: 'Registration created successfully!',
-      registration: registrationData,
+      registration: {
+        ...registrationData,
+        phone: sanitizedPhone // Add phone field for compatibility
+      },
       qrCode: qrCodeDataURL
     });
   } catch (err) {

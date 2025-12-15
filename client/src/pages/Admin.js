@@ -235,6 +235,22 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
     }
   };
 
+  const handleDeleteEvent = async (eventId) => {
+    if (window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+      try {
+        await eventsAPI.delete(eventId);
+        toast.success('Event deleted successfully!');
+        if (selectedEvent?.eventId === eventId) {
+          setSelectedEvent(null);
+        }
+        fetchEvents();
+      } catch (error) {
+        console.error('Event deletion error:', error);
+        toast.error('Error deleting event');
+      }
+    }
+  };
+
   const exportData = async (type) => {
     try {
       const response = type === 'registrations' 
@@ -388,31 +404,42 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Select Event</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {events.map((event) => (
-              <button
+              <div
                 key={event.eventId}
-                onClick={() => setSelectedEvent(event)}
-                className={`text-left p-4 rounded-lg border-2 transition-colors ${
+                className={`relative p-4 rounded-lg border-2 transition-colors ${
                   selectedEvent?.eventId === event.eventId
                     ? 'border-blue-600 bg-blue-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <h3 className="font-semibold text-gray-900">{event.name}</h3>
-                <div className="text-sm text-gray-600 mt-1 space-y-1">
-                  <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    {new Date(event.date).toLocaleDateString()}
+                <button
+                  onClick={() => setSelectedEvent(event)}
+                  className="text-left w-full"
+                >
+                  <h3 className="font-semibold text-gray-900">{event.name}</h3>
+                  <div className="text-sm text-gray-600 mt-1 space-y-1">
+                    <div className="flex items-center">
+                      <Calendar className="w-4 h-4 mr-1" />
+                      {new Date(event.date).toLocaleDateString()}
+                    </div>
+                    <div className="flex items-center">
+                      <Clock className="w-4 h-4 mr-1" />
+                      {event.time}
+                    </div>
+                    <div className="flex items-center">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      {event.venue}
+                    </div>
                   </div>
-                  <div className="flex items-center">
-                    <Clock className="w-4 h-4 mr-1" />
-                    {event.time}
-                  </div>
-                  <div className="flex items-center">
-                    <MapPin className="w-4 h-4 mr-1" />
-                    {event.venue}
-                  </div>
-                </div>
-              </button>
+                </button>
+                <button
+                  onClick={() => handleDeleteEvent(event.eventId)}
+                  className="absolute top-2 right-2 text-red-500 hover:text-red-700 p-1"
+                  title="Delete Event"
+                >
+                  ×
+                </button>
+              </div>
             ))}
           </div>
         </div>
