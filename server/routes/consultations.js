@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { v4: uuidv4 } = require('uuid');
-const Consultation = require('../models/Consultation');
 
 // Create consultation request
 router.post('/', async (req, res) => {
   try {
+    const { v4: uuidv4 } = require('uuid');
+    const Consultation = require('../models/Consultation');
+    
     const { company, contact, email, phone, requirements } = req.body;
     
     // Input validation
@@ -42,6 +43,8 @@ router.post('/', async (req, res) => {
 // Get all consultations (admin)
 router.get('/', async (req, res) => {
   try {
+    const Consultation = require('../models/Consultation');
+    
     const { status } = req.query;
     const filter = status ? { status } : {};
     
@@ -57,6 +60,8 @@ router.get('/', async (req, res) => {
 // Update consultation status
 router.patch('/:id/status', async (req, res) => {
   try {
+    const Consultation = require('../models/Consultation');
+    
     const { status } = req.body;
     
     if (!['pending', 'completed', 'checkedIn'].includes(status)) {
@@ -87,6 +92,8 @@ router.patch('/:id/status', async (req, res) => {
 // Search consultations by email
 router.get('/search', async (req, res) => {
   try {
+    const Consultation = require('../models/Consultation');
+    
     const email = req.query.email?.toLowerCase().trim();
     if (!email) {
       return res.status(400).json({ message: 'Email parameter required' });

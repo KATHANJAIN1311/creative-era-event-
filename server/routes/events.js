@@ -66,6 +66,14 @@ router.get('/:id', async (req, res) => {
 
 // Create new event
 router.post('/', async (req, res) => {
+  // CSRF Protection - Validate request origin
+  const origin = req.get('Origin') || req.get('Referer');
+  const allowedOrigins = [process.env.CLIENT_URL, 'http://localhost:3005', 'http://localhost:3000'];
+  
+  if (origin && !allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+    return res.status(403).json({ message: 'Forbidden: Invalid origin' });
+  }
+
   // Check if request has multipart data
   const contentType = req.headers['content-type'];
   

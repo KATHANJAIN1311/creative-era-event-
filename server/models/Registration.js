@@ -1,51 +1,28 @@
+// models/Registration.js
+// models/Registration.js
 const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
 
 const registrationSchema = new mongoose.Schema({
-  registrationId: {
-    type: String,
-    required: true,
-    unique: true
+  registrationId: { 
+    type: String, 
+    unique: true,
+    default: () => uuidv4().substring(0, 8).toUpperCase()
   },
-  eventId: {
-    type: String,
-    required: true,
-    ref: 'Event'
-  },
-  name: {
-    type: String,
-    required: true
-  },
-  email: {
-    type: String,
-    required: true
-  },
-  phone: {
-    type: String,
-    required: true
-  },
-  qrCode: {
-    type: String,
-    required: true
-  },
-  registrationType: {
-    type: String,
-    enum: ['online', 'kiosk'],
-    default: 'online'
-  },
-  isCheckedIn: {
-    type: Boolean,
-    default: false
-  },
-  checkedAt: {
-    type: Date,
-    default: null
-  },
-  whatsappSent: {
-    type: Boolean,
-    default: false
-  }
+  eventId: { type: String, required: true, ref: 'Event' },
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  phoneNumber: { type: String, required: true },
+  qrCode: { type: String, required: true },
+  registrationType: { type: String, enum: ['online', 'kiosk'], default: 'online' },
+  organization: { type: String, default: '' },
+  designation: { type: String, default: '' },
+  isCheckedIn: { type: Boolean, default: false },
+  checkedInAt: { type: Date }
 }, {
   timestamps: true
 });
 
-module.exports = mongoose.model('Registration', registrationSchema);
+const Registration = mongoose.model('Registration', registrationSchema);
+
+module.exports = Registration;

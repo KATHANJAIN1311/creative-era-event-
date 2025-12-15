@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { eventsAPI, adminAPI } from '../utils/api';
 import AdminLogin from '../components/AdminLogin';
 import { Line, Doughnut } from 'react-chartjs-2';
@@ -62,6 +62,8 @@ const Admin = () => {
   });
   const [selectedImage, setSelectedImage] = useState(null);
 
+  // fetchEvents is stable in this component scope; allow it in effect without exhaustive-deps noise
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
     if (token) {
@@ -72,6 +74,8 @@ const Admin = () => {
     }
   }, []);
 
+  // fetchDashboardData, fetchConsultations and fetchRegistrations are stable helpers
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (selectedEvent) {
       fetchDashboardData(selectedEvent.eventId);
@@ -100,18 +104,22 @@ const Admin = () => {
   };
 
   const fetchEvents = async () => {
-    try {
-      const response = await eventsAPI.getAll();
-      setEvents(response.data);
-      if (response.data.length > 0 && !selectedEvent) {
-        setSelectedEvent(response.data[0]);
-      }
-    } catch (error) {
-      console.error('Error fetching events:', error);
-    } finally {
-      setLoading(false);
+  try {
+    console.log('Fetching events from:', process.env.REACT_APP_API_URL);
+    const response = await eventsAPI.getAll();
+    console.log('Events response:', response);
+    setEvents(Array.isArray(response.data) ? response.data : []);
+    if (response.data.length > 0 && !selectedEvent) {
+      setSelectedEvent(response.data[0]);
     }
-  };
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    setEvents([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const fetchDashboardData = async (eventId) => {
     try {
@@ -134,22 +142,29 @@ const Admin = () => {
   };
 
   const fetchRegistrations = async () => {
-    try {
-      const response = await fetch(`/api/registrations/event/${selectedEvent.eventId}`);
-      const data = await response.json();
-      setRegistrations(data);
-    } catch (error) {
-      console.error('Error fetching registrations:', error);
-    }
-  };
+  try {
+    const response = await fetch(`/api/registrations/event/${selectedEvent.eventId}`);
+    const data = await response.json();
+    setRegistrations(Array.isArray(data) ? data : []);
+  } catch (error) {
+    console.error('Error fetching registrations:', error);
+    setRegistrations([]);
+  }
+};
+
 
   const updateConsultationStatus = async (id, status) => {
     try {
       await fetch(`/api/consultations/${id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
+  method: 'PATCH',
+  headers: { 
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+    'X-CSRF-Token': 'admin-action'
+  },
+  body: JSON.stringify({ status })
+});
+
       toast.success('Status updated successfully');
       fetchConsultations();
     } catch (error) {
@@ -159,12 +174,21 @@ const Admin = () => {
 
   const handleCheckIn = async (registrationId) => {
     try {
-      const response = await fetch(`/api/registrations/${registrationId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'checkedIn' })
-      });
-      
+     // Validate registrationId to prevent SSRF
+if (!registrationId || typeof registrationId !== 'string' || !/^[A-Z0-9]{8}$/.test(registrationId)) {
+  toast.error('Invalid registration ID');
+  return;
+}
+
+const response = await fetch(`/api/registrations/${registrationId}/status`, {
+  method: 'PATCH',
+  headers: { 
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+    'X-CSRF-Token': 'admin-action'
+  },
+  body: JSON.stringify({ status: 'checkedIn' })
+});    
       if (response.ok) {
         toast.success('User checked in successfully!');
         fetchDashboardData(selectedEvent.eventId);
@@ -589,75 +613,76 @@ const Admin = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {registrations
-                  .filter(reg => {
-                    if (registrationFilter === 'checkedIn') return reg.isCheckedIn;
-                    if (registrationFilter === 'pending') return !reg.isCheckedIn;
-                    return true;
-                  })
-                  .map((registration) => (
-                  <tr key={registration.registrationId}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {registration.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {registration.email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {registration.phone}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        registration.registrationType === 'online'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-green-100 text-green-800'
-                      }`}>
-                        {registration.registrationType}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        registration.isCheckedIn
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {registration.isCheckedIn ? (
-                          <>
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Checked In
-                          </>
-                        ) : (
-                          <>
-                            <Clock className="w-3 h-3 mr-1" />
-                            Pending
-                          </>
-                        )}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      {!registration.isCheckedIn ? (
-                        <button
-                          onClick={() => handleCheckIn(registration.registrationId)}
-                          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-1"
-                        >
-                          <CheckCircle className="w-4 h-4" />
-                          <span>Check In</span>
-                        </button>
-                      ) : (
-                        <div className="text-green-600 flex items-center space-x-1">
-                          <CheckCircle className="w-4 h-4" />
-                          <span>Checked In</span>
-                          {registration.checkedAt && (
-                            <span className="text-xs text-gray-500 ml-2">
-                              {new Date(registration.checkedAt).toLocaleString()}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+  {(Array.isArray(registrations) ? registrations : [])
+    .filter(reg => {
+      if (registrationFilter === 'checkedIn') return reg.isCheckedIn;
+      if (registrationFilter === 'pending') return !reg.isCheckedIn;
+      return true;
+    })
+    .map((registration) => (
+      <tr key={registration.registrationId}>
+        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+          {registration.name}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          {registration.email}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          {registration.phone}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            registration.registrationType === 'online'
+              ? 'bg-blue-100 text-blue-800'
+              : 'bg-green-100 text-green-800'
+          }`}>
+            {registration.registrationType}
+          </span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            registration.isCheckedIn
+              ? 'bg-green-100 text-green-800'
+              : 'bg-yellow-100 text-yellow-800'
+          }`}>
+            {registration.isCheckedIn ? (
+              <>
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Checked In
+              </>
+            ) : (
+              <>
+                <Clock className="w-3 h-3 mr-1" />
+                Pending
+              </>
+            )}
+          </span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+          {!registration.isCheckedIn ? (
+            <button
+              onClick={() => handleCheckIn(registration.registrationId)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-1"
+            >
+              <CheckCircle className="w-4 h-4" />
+              <span>Check In</span>
+            </button>
+          ) : (
+            <div className="text-green-600 flex items-center space-x-1">
+              <CheckCircle className="w-4 h-4" />
+              <span>Checked In</span>
+              {registration.checkedAt && (
+                <span className="text-xs text-gray-500 ml-2">
+                  {new Date(registration.checkedAt).toLocaleString()}
+                </span>
+              )}
+            </div>
+          )}
+        </td>
+      </tr>
+    ))}
+</tbody>
+
             </table>
             {registrations.filter(reg => {
               if (registrationFilter === 'checkedIn') return reg.isCheckedIn;

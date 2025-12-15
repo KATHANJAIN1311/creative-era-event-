@@ -1,355 +1,174 @@
 const express = require('express');
-const router = express.Router();
 const QRCode = require('qrcode');
 const { v4: uuidv4 } = require('uuid');
+const nodemailer = require('nodemailer');
 const Registration = require('../models/Registration');
-const Event = require('../models/Event');
-const twilio = require('twilio');
 
-let client = null;
-if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && 
-    process.env.TWILIO_ACCOUNT_SID.startsWith('AC')) {
-  client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-}
+const router = express.Router();
 
-// Register for event
 router.post('/', async (req, res) => {
   try {
-    const { eventId, name, email, phone, registrationType = 'online' } = req.body;
+    // CSRF Protection - Validate request origin
+    const origin = req.get('Origin') || req.get('Referer');
+    const allowedOrigins = [process.env.CLIENT_URL, 'http://localhost:3005', 'http://localhost:3000'];
     
-    // Input validation
-    if (!eventId || !name || !email || !phone) {
-      return res.status(400).json({ message: 'All fields are required' });
+    if (origin && !allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+      return res.status(403).json({ message: 'Forbidden: Invalid origin' });
     }
+
+    const { name, email, phone, eventId, registrationType, organization, designation } = req.body;
     
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ message: 'Invalid email format' });
-    }
+    // Input sanitization to prevent XSS
+    const sanitizedName = name ? name.replace(/[<>]/g, '') : '';
+    const sanitizedEmail = email ? email.replace(/[<>]/g, '') : '';
+    const sanitizedPhone = phone ? phone.replace(/[<>]/g, '') : '';
+    const sanitizedOrganization = organization ? organization.replace(/[<>]/g, '') : '';
+    const sanitizedDesignation = designation ? designation.replace(/[<>]/g, '') : '';
     
-    if (!/^[0-9]{10}$/.test(phone.replace(/\D/g, ''))) {
-      return res.status(400).json({ message: 'Phone number must be 10 digits' });
-    }
+    // Generate unique registration ID
+    const registrationId = uuidv4().substring(0, 8).toUpperCase();
     
-    // Check if event exists
-    const event = await Event.findOne({ eventId });
-    if (!event) {
-      return res.status(404).json({ message: 'Event not found' });
-    }
-    
-    // Check if already registered
-    const existingRegistration = await Registration.findOne({ eventId, email });
-    if (existingRegistration) {
-      return res.status(400).json({ message: 'Already registered for this event' });
-    }
-    
-    const registrationId = uuidv4();
-    
-    // Generate minimal QR code data
-    const qrData = `${registrationId}|${eventId}`;
-    
-    const registration = new Registration({
+    // Create QR code data
+    const qrData = {
       registrationId,
       eventId,
-      name,
-      email: email.toLowerCase(),
-      phone: phone.replace(/\D/g, ''),
-      qrCode: qrData,
-      registrationType
-    });
+      name: sanitizedName,
+      email: sanitizedEmail,
+      timestamp: new Date().toISOString()
+    };
     
-    const savedRegistration = await registration.save();
+    // Generate QR code
+    const qrCodeDataURL = await QRCode.toDataURL(JSON.stringify(qrData));
     
-    // Send WhatsApp message if online registration
-    if (registrationType === 'online' && client) {
-      try {
-        const qrCodeDataURL = await QRCode.toDataURL(qrData);
-        await client.messages.create({
-          from: process.env.TWILIO_WHATSAPP_NUMBER,
-          to: `whatsapp:+91${phone.replace(/\D/g, '')}`,
-          body: `Hi ${name}! You're registered for ${event.name}. Show this QR code at the venue for check-in.`,
-          mediaUrl: [qrCodeDataURL]
-        });
-        
-        await Registration.findOneAndUpdate(
-          { registrationId },
-          { whatsappSent: true }
-        );
-      } catch (whatsappError) {
-        console.log('WhatsApp send failed:', whatsappError.message);
-      }
-    }
-    
-    // Emit real-time update
-    req.io.emit('newRegistration', {
+    const registrationData = {
+      registrationId,
       eventId,
-      registrationCount: await Registration.countDocuments({ eventId })
-    });
+      name: sanitizedName,
+      email: sanitizedEmail,
+      phoneNumber: sanitizedPhone,
+      qrCode: qrCodeDataURL,
+      registrationType: registrationType || 'online',
+      organization: sanitizedOrganization,
+      designation: sanitizedDesignation
+    };
     
-    res.status(201).json(savedRegistration);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-// Get registrations for event
-router.get('/event/:eventId', async (req, res) => {
-  try {
-    const registrations = await Registration.find({ eventId: req.params.eventId })
-      .sort({ createdAt: -1 });
-    res.json(registrations);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Debug route - get all registrations
-router.get('/debug/all', async (req, res) => {
-  try {
-    const registrations = await Registration.find({}).limit(10);
-    const totalCount = await Registration.countDocuments({});
-    res.json({
-      totalCount,
-      count: registrations.length,
-      registrations: registrations.map(r => ({
-        email: r.email,
-        name: r.name,
-        eventId: r.eventId,
-        registrationId: r.registrationId,
-        createdAt: r.createdAt
-      }))
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Search registrations by email
-router.get('/search', async (req, res) => {
-  try {
-    const email = req.query.email?.toLowerCase().trim();
-    if (!email) {
-      return res.status(400).json({ message: 'Email parameter required' });
-    }
-    
-    console.log('Searching for email:', email);
-    
-    let registrations = await Registration.find({ 
-      email: { $regex: email, $options: 'i' }
-    }).sort({ createdAt: -1 });
-    
-    console.log('Found registrations:', registrations.length);
-    
-    const registrationsWithEvents = await Promise.all(
-      registrations.map(async (registration) => {
-        try {
-          const event = await Event.findOne({ eventId: registration.eventId });
-          return {
-            ...registration.toObject(),
-            eventName: event?.name || 'Unknown Event',
-            eventDate: event?.date || null
-          };
-        } catch (eventError) {
-          console.error('Error fetching event for registration:', eventError);
-          return {
-            ...registration.toObject(),
-            eventName: 'Unknown Event',
-            eventDate: null
-          };
-        }
-      })
-    );
-    
-    res.json(registrationsWithEvents);
-  } catch (error) {
-    console.error('Email search error:', error);
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Update registration status to checked-in
-router.patch('/:id/status', async (req, res) => {
-  try {
-    console.log('Check-in request for ID:', req.params.id);
-    const { status } = req.body;
-    
-    if (status !== 'checkedIn') {
-      return res.status(400).json({ message: 'Invalid status' });
-    }
-    
-    const registration = await Registration.findOneAndUpdate(
-      { registrationId: req.params.id },
-      { 
-        isCheckedIn: true,
-        checkedAt: new Date()
-      },
-      { new: true }
-    );
-    
-    if (!registration) {
-      console.log('Registration not found for ID:', req.params.id);
-      return res.status(404).json({ message: 'Registration not found' });
-    }
-    
-    console.log('Registration checked in successfully:', registration.name);
-    
-    // Emit real-time update if io is available
-    if (req.io) {
-      req.io.emit('checkinUpdate', {
-        eventId: registration.eventId,
-        registrationId: registration.registrationId,
-        isCheckedIn: true
-      });
-    }
-    
-    res.json(registration);
-  } catch (error) {
-    console.error('Check-in error:', error);
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Check-in via QR code or registration ID
-router.post('/checkin', async (req, res) => {
-  try {
-    console.log('Check-in request body:', req.body);
-    const { qrData, registrationId } = req.body;
-    
-    let registration;
-    let searchId;
-    
-    if (qrData && qrData.trim()) {
-      // Parse QR data format: registrationId|eventId
-      const parts = qrData.trim().split('|');
-      searchId = parts[0];
-      console.log('Searching by QR data, extracted ID:', searchId);
-      registration = await Registration.findOne({ registrationId: searchId });
-    } else if (registrationId && registrationId.trim()) {
-      searchId = registrationId.trim();
-      console.log('Searching by registration ID:', searchId);
-      registration = await Registration.findOne({ registrationId: searchId });
-    } else {
-      console.log('No valid input provided');
-      return res.status(400).json({ message: 'QR data or registration ID required' });
-    }
-    
-    console.log('Registration found:', !!registration);
-    
-    if (!registration) {
-      console.log('Registration not found for ID:', searchId);
-      return res.status(404).json({ message: 'Registration not found' });
-    }
-    
-    console.log('Registration details:', {
-      id: registration.registrationId,
-      name: registration.name,
-      isCheckedIn: registration.isCheckedIn
-    });
-    
-    if (registration.isCheckedIn) {
-      console.log('User already checked in');
-      const event = await Event.findOne({ eventId: registration.eventId });
-      return res.json({ 
-        success: false,
-        message: 'Already checked in',
-        registration,
-        event,
-        alreadyCheckedIn: true
-      });
-    }
-    
-    // Update registration
-    registration.isCheckedIn = true;
-    registration.checkedAt = new Date();
+    const registration = new Registration(registrationData);
     await registration.save();
     
-    console.log('Registration updated successfully');
-    
-    // Get event details
-    const event = await Event.findOne({ eventId: registration.eventId });
-    console.log('Event found:', !!event);
-    
     // Emit real-time update
     if (req.io) {
-      req.io.emit('checkinUpdate', {
-        eventId: registration.eventId,
-        registrationId: registration.registrationId,
-        isCheckedIn: true
-      });
+      req.io.emit('newRegistration', { eventId, registration: registrationData });
     }
     
-    res.json({
-      success: true,
-      registration,
-      event,
-      message: 'Successfully checked in'
+    // Send email with QR code using secure connection
+    try {
+      const transporter = nodemailer.createTransporter({
+        service: 'gmail',
+        secure: true, // Use TLS
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
+        },
+        tls: {
+          rejectUnauthorized: true
+        }
+      });
+
+      const mailOptions = {
+        from: `"Event Registration" <${process.env.EMAIL_USER}>`,
+        to: sanitizedEmail,
+        subject: `Registration Successful - ID: ${registrationId}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">Hello ${sanitizedName},</h2>
+            <p>Thank you for registering for the event. Below are your registration details:</p>
+            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <p><strong>Registration ID:</strong> ${registrationId}</p>
+              <p><strong>Event ID:</strong> ${eventId}</p>
+              <p><strong>Name:</strong> ${sanitizedName}</p>
+              <p><strong>Email:</strong> ${sanitizedEmail}</p>
+              <p><strong>Phone:</strong> ${sanitizedPhone}</p>
+            </div>
+            <p><strong>Your QR Code:</strong></p>
+            <div style="text-align: center; margin: 20px 0;">
+              <img src="${qrCodeDataURL}" alt="QR Code" style="border: 1px solid #ddd; padding: 10px;" />
+            </div>
+            <p style="color: #666; font-size: 14px;">Save this email for event check-in. Show the QR code at the venue for quick entry.</p>
+          </div>
+        `
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log('Email sent successfully to:', sanitizedEmail);
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      // Don't fail the registration if email fails
+    }
+    
+    res.status(201).json({
+      message: 'Registration created successfully!',
+      registration: registrationData,
+      qrCode: qrCodeDataURL
     });
-  } catch (error) {
-    console.error('Check-in error details:', {
-      message: error.message,
-      stack: error.stack,
-      body: req.body
-    });
-    res.status(500).json({ 
-      message: 'Check-in failed: ' + error.message,
-      error: error.message 
+  } catch (err) {
+    console.error('Registration error:', err);
+    res.status(400).json({ 
+      error: err.message || 'Error creating registration' 
     });
   }
 });
 
-// Debug: Check if registration exists
-router.get('/debug/check/:id', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const registrationId = req.params.id;
-    console.log('Debug check for registration ID:', registrationId);
-    
-    const registration = await Registration.findOne({ registrationId });
-    const exists = !!registration;
-    
-    res.json({
-      registrationId,
-      exists,
-      registration: registration ? {
-        name: registration.name,
-        email: registration.email,
-        eventId: registration.eventId,
-        isCheckedIn: registration.isCheckedIn,
-        createdAt: registration.createdAt
-      } : null
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    const registrations = await Registration.find().sort({ createdAt: -1 });
+    res.json(registrations);
+  } catch (err) {
+    console.error('Error fetching registrations:', err);
+    res.status(400).json({ error: 'Error fetching registrations' });
   }
 });
 
-// Get registration by ID
-router.get('/:id', async (req, res) => {
+router.get('/event/:eventId', async (req, res) => {
   try {
-    const registration = await Registration.findOne({ registrationId: req.params.id });
+    const registrations = await Registration.find({ eventId: req.params.eventId }).sort({ createdAt: -1 });
+    res.json(registrations);
+  } catch (err) {
+    console.error('Error fetching event registrations:', err);
+    res.status(400).json({ error: 'Error fetching event registrations' });
+  }
+});
+
+router.get('/user/:email', async (req, res) => {
+  try {
+    const registrations = await Registration.find({ email: req.params.email }).sort({ createdAt: -1 });
+    res.json(registrations);
+  } catch (err) {
+    console.error('Error fetching user registrations:', err);
+    res.status(400).json({ error: 'Error fetching user registrations' });
+  }
+});
+
+router.get('/search', async (req, res) => {
+  try {
+    const { email } = req.query;
+    const registrations = await Registration.find({ email }).sort({ createdAt: -1 });
+    res.json(registrations);
+  } catch (err) {
+    console.error('Error searching registrations:', err);
+    res.status(400).json({ error: 'Error searching registrations' });
+  }
+});
+
+router.get('/:registrationId', async (req, res) => {
+  try {
+    const registration = await Registration.findOne({ registrationId: req.params.registrationId });
     if (!registration) {
-      return res.status(404).json({ message: 'Registration not found' });
+      return res.status(404).json({ error: 'Registration not found' });
     }
     res.json(registration);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Test endpoint
-router.get('/test/connection', async (req, res) => {
-  try {
-    const count = await Registration.countDocuments({});
-    res.json({ 
-      success: true, 
-      message: 'API connection working', 
-      totalRegistrations: count,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: 'Database connection failed', 
-      error: error.message 
-    });
+  } catch (err) {
+    console.error('Error fetching registration:', err);
+    res.status(400).json({ error: 'Error fetching registration' });
   }
 });
 

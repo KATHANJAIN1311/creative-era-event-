@@ -5,11 +5,12 @@ import App from './App';
 
 // Suppress browser extension errors
 window.addEventListener('error', (e) => {
-  if (e.message.includes('message channel closed')) {
+  // Only suppress specific browser extension errors, not security-related errors
+  if (e.message && e.message.includes('message channel closed') && 
+      e.filename && e.filename.includes('extension')) {
     e.preventDefault();
   }
 });
-
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

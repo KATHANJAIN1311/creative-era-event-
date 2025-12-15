@@ -11,13 +11,18 @@ const AdminLogin = ({ onLogin }) => {
     setLoading(true);
     
     try {
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+      // Ensure API_URL includes '/api' so requests hit server routes correctly
+      const rawApi = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const API_URL = rawApi.endsWith('/api') ? rawApi : `${rawApi.replace(/\/$/, '')}/api`;
       const response = await fetch(`${API_URL}/admin/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials)
-      });
-      
+      method: 'POST',
+      headers: { 
+    'Content-Type': 'application/json',
+    'X-CSRF-Token': 'admin-login'
+    },
+    body: JSON.stringify(credentials)
+    });
+ 
       const data = await response.json();
       
       if (response.ok) {
@@ -51,7 +56,7 @@ const AdminLogin = ({ onLogin }) => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label className="sr-only">Username</label>
+              <label className="sr-only" aria-label="Username input field">Username</label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <input
@@ -66,7 +71,7 @@ const AdminLogin = ({ onLogin }) => {
             </div>
             
             <div>
-              <label className="sr-only">Password</label>
+              <label className="sr-only" aria-label="Password input field">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <input

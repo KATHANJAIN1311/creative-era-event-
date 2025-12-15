@@ -13,12 +13,13 @@ const createDefaultAdmin = async () => {
     }
     
     const admin = new Admin({
-      username: 'admin',
-      password: 'admin123'
-    });
+  username: process.env.ADMIN_USERNAME || 'admin',
+  password: process.env.ADMIN_PASSWORD || 'defaultPassword123'
+});
+
     
     await admin.save();
-    console.log('Default admin created: username=admin, password=admin123');
+    console.log(`Default admin created: username=${admin.username}`);
   } catch (error) {
     console.error('Error creating admin:', error);
   } finally {

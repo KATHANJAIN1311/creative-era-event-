@@ -28,10 +28,13 @@ const CheckIn = () => {
       console.log('Sending check-in request:', requestBody);
       
       const response = await fetch('/api/registrations/checkin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      });
+  method: 'POST',
+  headers: { 
+    'Content-Type': 'application/json',
+    'X-CSRF-Token': 'checkin-action'
+  },
+  body: JSON.stringify(requestBody)
+});
 
       const data = await response.json();
       console.log('Check-in response:', data);

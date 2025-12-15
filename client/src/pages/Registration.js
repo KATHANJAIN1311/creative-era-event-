@@ -97,8 +97,9 @@ const Registration = () => {
           </h2>
           
           <p className="text-gray-600 mb-6">
-            Your QR code has been sent to your WhatsApp. You can also download it below.
-          </p>
+         Your QR code has been sent to your email. You can also download it below.
+        </p>
+
 
           {/* Registration Details */}
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
@@ -114,7 +115,7 @@ const Registration = () => {
           {/* QR Code Info */}
           <div className="bg-blue-50 p-4 rounded-lg mb-6">
             <p className="text-blue-800 text-sm">
-              <strong>Your QR Code:</strong> Has been generated and sent to your WhatsApp number.
+              <strong>Your QR Code:</strong> Has been generated and sent to your Gmail.
             </p>
             <p className="text-blue-600 text-xs mt-2">
               Registration ID: <code className="bg-blue-100 px-2 py-1 rounded">{registration.registrationId}</code>
@@ -146,12 +147,6 @@ const Registration = () => {
             </button>
           </div>
 
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>Important:</strong> Please bring this QR code to the event venue for check-in. 
-              You can show it on your phone or print it out.
-            </p>
-          </div>
         </div>
       )}
     </div>

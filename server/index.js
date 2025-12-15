@@ -21,11 +21,17 @@ const io = socketIo(server, {
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:3005',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token']
+}));
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
 // Socket.io connection
+// amazonq-ignore-next-line
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
   
@@ -52,7 +58,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/event-reg
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log('MongoDB connection error:', err));
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5002;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

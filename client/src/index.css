@@ -139,19 +139,26 @@ body {
   color: hsl(var(--foreground));
 }
 
+/* Fixed icon positioning for all input fields with icons */
 .input-field.pl-10 {
-  padding-left: 2.75rem; /* 44px - enough space for icon + padding */
+  padding-left: 3rem; /* 48px - adequate space for icon */
+}
+
+.input-field.pl-12 {
+  padding-left: 3rem; /* 48px - consistent with pl-10 */
 }
 
 /* Special handling for textarea with icons */
-textarea.input-field.pl-10 {
-  padding-left: 2.75rem;
-  padding-top: 0.75rem; /* 12px */
+textarea.input-field.pl-10,
+textarea.input-field.pl-12 {
+  padding-left: 3rem;
+  padding-top: 0.75rem;
 }
 
 /* For textareas with pt-3 class */
-textarea.input-field.pl-10.pt-3 {
-  padding-top: 0.75rem; /* Override pt-3 for consistency */
+textarea.input-field.pl-10.pt-3,
+textarea.input-field.pl-12.pt-3 {
+  padding-top: 0.75rem;
 }
 
 .input-field::placeholder {
@@ -164,30 +171,43 @@ textarea.input-field.pl-10.pt-3 {
   box-shadow: 0 0 0 3px hsl(var(--brand-blue) / 0.1);
 }
 
-/* Icon positioning for forms */
+/* Icon positioning - ensure icons don't interfere with input */
 .relative .lucide {
-  pointer-events: none; /* Prevent icon from interfering with input */
+  pointer-events: none;
+  z-index: 1;
 }
 
-/* Responsive adjustments for smaller screens */
+/* Ensure proper icon positioning in relative containers */
+.relative input + .lucide,
+.relative .lucide + input {
+  position: absolute;
+  left: 1rem; /* 16px */
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Responsive adjustments */
 @media (max-width: 640px) {
-  .input-field.pl-10 {
-    padding-left: 2.5rem; /* 40px for smaller screens */
+  .input-field.pl-10,
+  .input-field.pl-12 {
+    padding-left: 2.75rem; /* 44px for smaller screens */
   }
   
-  textarea.input-field.pl-10 {
-    padding-left: 2.5rem;
+  textarea.input-field.pl-10,
+  textarea.input-field.pl-12 {
+    padding-left: 2.75rem;
   }
 }
 
-/* Ensure proper spacing for all form inputs with icons */
 @media (min-width: 768px) {
-  .input-field.pl-10 {
-    padding-left: 3rem; /* 48px for larger screens */
+  .input-field.pl-10,
+  .input-field.pl-12 {
+    padding-left: 3.25rem; /* 52px for larger screens */
   }
   
-  textarea.input-field.pl-10 {
-    padding-left: 3rem;
+  textarea.input-field.pl-10,
+  textarea.input-field.pl-12 {
+    padding-left: 3.25rem;
   }
 }
 
@@ -227,9 +247,14 @@ textarea.input-field.pl-10.pt-3 {
 }
 
 .kiosk-mode .input-field {
-  @apply text-lg py-3 px-4;
+  @apply text-lg py-4 px-4;
+}
+
+.kiosk-mode .input-field.pl-10,
+.kiosk-mode .input-field.pl-12 {
+  padding-left: 3.5rem; /* Extra space for kiosk mode */
 }
 
 .kiosk-mode .btn-primary {
-  @apply text-lg py-3 px-6;
+  @apply text-lg py-4 px-6;
 }

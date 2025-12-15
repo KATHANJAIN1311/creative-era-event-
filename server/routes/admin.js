@@ -6,15 +6,51 @@ const Event = require('../models/Event');
 const Registration = require('../models/Registration');
 const Checkin = require('../models/Checkin');
 
+// CSRF protection middleware
+const csrfProtection = (req, res, next) => {
+  if (req.method === 'POST' || req.method === 'PUT' || req.method === 'DELETE') {
+    const origin = req.get('Origin');
+    const contentType = req.get('Content-Type');
+    const allowedOrigins = ['http://localhost:3005', 'http://127.0.0.1:3005'];
+    
+    // Require JSON content type for state-changing requests
+    if (!contentType || !contentType.includes('application/json')) {
+      return res.status(403).json({ message: 'Invalid content type' });
+    }
+    
+    if (!origin || !allowedOrigins.includes(origin)) {
+      return res.status(403).json({ message: 'CSRF protection: Invalid origin' });
+    }
+  }
+  next();
+};
+const validateLoginInput = (req, res, next) => {
+  const { username, password } = req.body;
+  
+  if (!username || !password || typeof username !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ message: 'Invalid input' });
+  }
+  
+  if (username.length > 50 || password.length > 100) {
+    return res.status(400).json({ message: 'Input too long' });
+  }
+  
+  next();
+};
+
+
 // Admin login
-router.post('/login', async (req, res) => {
+router.post('/login', csrfProtection, validateLoginInput, async (req, res) => {
   try {
     const { username, password } = req.body;
     
     // Create default admin if it doesn't exist
     let admin = await Admin.findOne({ username });
     if (!admin && username === 'admin') {
-      admin = new Admin({ username: 'admin', password: 'admin123' });
+    admin = new Admin({ 
+  username: process.env.ADMIN_USERNAME || 'admin', 
+  password: process.env.ADMIN_PASSWORD || 'defaultPassword123' 
+});
       await admin.save();
     }
     
@@ -23,9 +59,13 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ message: 'Server configuration error' });
+    }
+    
     const token = jwt.sign(
-      { adminId: admin._id, username: admin.username },
-      process.env.JWT_SECRET || 'fallback_secret',
+      { username: admin.username },
+      process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
     
@@ -38,20 +78,26 @@ router.post('/login', async (req, res) => {
 
 // Auth middleware
 const authenticateAdmin = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-  
-  if (!token) {
-    return res.status(401).json({ message: 'Access denied' });
-  }
-  
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
-    req.admin = decoded;
-    next();
-  } catch (error) {
-    res.status(401).json({ message: 'Invalid token' });
-  }
+  // Apply CSRF protection first
+  csrfProtection(req, res, (err) => {
+    if (err) return next(err);
+    
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({ message: 'Access denied' });
+    }
+    
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+      req.admin = decoded;
+      next();
+    } catch (error) {
+      res.status(401).json({ message: 'Invalid token' });
+    }
+  });
 };
+
 
 // Get dashboard statistics
 router.get('/dashboard/:eventId', authenticateAdmin, async (req, res) => {

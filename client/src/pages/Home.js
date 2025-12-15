@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { eventsAPI } from '../utils/api';
 import EventCard from '../components/EventCard';
 import socketService from '../utils/socket';
-import { Calendar, Users, QrCode, Monitor, ArrowRight, Building, Award, Shield, Zap } from 'lucide-react';
+import { Calendar, Users, QrCode, Monitor, ArrowRight, Building,Zap } from 'lucide-react';
 
 const Home = () => {
   const [events, setEvents] = useState([]);
@@ -13,28 +13,38 @@ const Home = () => {
     fetchEvents();
     
     // Connect to socket for real-time updates
-    const socket = socketService.connect();
-    
-    socket.on('newRegistration', (data) => {
-      setEvents(prevEvents => 
-        prevEvents.map(event => 
-          event.eventId === data.eventId 
-            ? { ...event, registrationCount: data.registrationCount }
-            : event
-        )
-      );
-    });
+   // Connect to socket for real-time updates with CSRF protection
+const socket = socketService.connect({
+  auth: {
+    'x-csrf-token': 'home-socket'
+  }
+});
 
-    socket.on('newCheckin', (data) => {
-      setEvents(prevEvents => 
-        prevEvents.map(event => 
-          event.eventId === data.eventId 
-            ? { ...event, checkedInCount: data.checkedInCount }
-            : event
-        )
-      );
-    });
+socket.on('newRegistration', (data) => {
+  // Validate data structure to prevent XSS
+  if (data && typeof data.eventId === 'string' && typeof data.registrationCount === 'number') {
+    setEvents(prevEvents => 
+      prevEvents.map(event => 
+        event.eventId === data.eventId 
+          ? { ...event, registrationCount: data.registrationCount }
+          : event
+      )
+    );
+  }
+});
 
+socket.on('newCheckin', (data) => {
+  // Validate data structure to prevent XSS
+  if (data && typeof data.eventId === 'string' && typeof data.checkedInCount === 'number') {
+    setEvents(prevEvents => 
+      prevEvents.map(event => 
+        event.eventId === data.eventId 
+          ? { ...event, checkedInCount: data.checkedInCount }
+          : event
+      )
+    );
+  }
+});
     return () => {
       socketService.disconnect();
     };

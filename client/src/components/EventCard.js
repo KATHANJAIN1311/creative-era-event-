@@ -29,9 +29,9 @@ const EventCard = ({ event }) => {
             <Calendar className="w-16 h-16 text-yellow-600/50" />
           </div>
         )}
-        <div className="absolute top-4 right-4">
-          <div className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-1">
-            <span className="text-yellow-400 text-sm font-medium">
+        <div className="absolute top-3 right-3 z-10">
+          <div className="bg-black/70 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg">
+            <span className="text-yellow-400 text-xs font-semibold uppercase tracking-wide">
               {new Date(event.date) >= new Date() ? 'Upcoming' : 'Past'}
             </span>
           </div>
@@ -39,7 +39,7 @@ const EventCard = ({ event }) => {
       </div>
       
       <div className="p-6">
-        <h3 className="text-xl font-bold text-black mb-3 group-hover:text-yellow-600 transition-colors">
+        <h3 className="text-xl font-bold text-black mb-3 group-hover:text-yellow-600 transition-colors line-clamp-2">
           {event.name}
         </h3>
         <p className="text-black mb-4 line-clamp-2 text-sm leading-relaxed">
@@ -48,21 +48,23 @@ const EventCard = ({ event }) => {
         
         <div className="space-y-3 mb-6">
           <div className="flex items-center text-sm text-black">
-            <Calendar className="w-4 h-4 mr-3 text-yellow-600" />
-            {formatDate(event.date)}
+            <Calendar className="w-4 h-4 mr-3 text-yellow-600 flex-shrink-0" />
+            <span className="truncate">{formatDate(event.date)}</span>
           </div>
           <div className="flex items-center text-sm text-black">
-            <Clock className="w-4 h-4 mr-3 text-yellow-600" />
-            {event.time}
+            <Clock className="w-4 h-4 mr-3 text-yellow-600 flex-shrink-0" />
+            <span className="truncate">{event.time}</span>
           </div>
           <div className="flex items-center text-sm text-black">
-            <MapPin className="w-4 h-4 mr-3 text-yellow-600" />
-            {event.venue}
+            <MapPin className="w-4 h-4 mr-3 text-yellow-600 flex-shrink-0" />
+            <span className="truncate">{event.venue}</span>
           </div>
           {(event.registrationCount || event.checkedInCount) && (
             <div className="flex items-center text-sm text-black">
-              <Users className="w-4 h-4 mr-3 text-yellow-600" />
-              {event.registrationCount || 0} registered • {event.checkedInCount || 0} attended
+              <Users className="w-4 h-4 mr-3 text-yellow-600 flex-shrink-0" />
+              <span className="truncate">
+                {event.registrationCount || 0} registered • {event.checkedInCount || 0} attended
+              </span>
             </div>
           )}
         </div>

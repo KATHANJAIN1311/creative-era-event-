@@ -21,7 +21,6 @@ const RegistrationForm = ({ event, registrationType = 'online', onSuccess }) => 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Basic validation
     if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim()) {
       toast.error('Please fill in all fields');
       return;
@@ -42,7 +41,7 @@ const RegistrationForm = ({ event, registrationType = 'online', onSuccess }) => 
     try {
       const registrationData = {
         ...formData,
-        phone: formData.phone.replace(/\D/g, ''), // Remove non-digits
+        phone: formData.phone.replace(/\D/g, ''),
         eventId: event.eventId,
         registrationType
       };
@@ -51,14 +50,13 @@ const RegistrationForm = ({ event, registrationType = 'online', onSuccess }) => 
       
       toast.success(
         registrationType === 'online' 
-          ? 'Registration successful! QR code will be sent to WhatsApp.' 
+          ? 'Registration successful! QR code will be sent to your email.' 
           : 'Registration successful! Please collect your QR slip.'
       );
       
       if (onSuccess) {
         onSuccess(response.data);
       } else {
-        // Reset form if no success callback
         setFormData({ name: '', email: '', phone: '' });
       }
     } catch (error) {
@@ -76,56 +74,56 @@ const RegistrationForm = ({ event, registrationType = 'online', onSuccess }) => 
         Register for {event.name}
       </h2>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Full Name
           </label>
           <div className="relative">
-            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
               required
-              className="input-field pl-10"
+              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               placeholder="Enter your full name"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Email Address
           </label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               required
-              className="input-field pl-10"
+              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               placeholder="Enter your email"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Phone Number
           </label>
           <div className="relative">
-            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
             <input
               type="tel"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
               required
-              className="input-field pl-10"
+              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               placeholder="Enter your 10-digit phone number"
               maxLength="15"
             />
@@ -135,16 +133,16 @@ const RegistrationForm = ({ event, registrationType = 'online', onSuccess }) => 
         <button
           type="submit"
           disabled={loading}
-          className="w-full btn-primary flex items-center justify-center space-x-2"
+          className="w-full btn-primary flex items-center justify-center space-x-2 py-4"
         >
-          {loading && <Loader className="w-4 h-4 animate-spin" />}
+          {loading && <Loader className="w-5 h-5 animate-spin" />}
           <span>{loading ? 'Registering...' : 'Register Now'}</span>
         </button>
       </form>
       
       {registrationType === 'online' && (
-        <p className="mt-4 text-sm text-gray-600 text-center">
-          Your QR code will be sent to your WhatsApp number after registration.
+        <p className="mt-6 text-sm text-gray-600 text-center">
+          Your QR code will be sent to your email address after registration.
         </p>
       )}
     </div>

@@ -7,14 +7,31 @@ const Checkin = require('../models/Checkin');
 // Check-in with QR code
 router.post('/verify', async (req, res) => {
   try {
+    // Validate request origin for CSRF protection
+    const origin = req.get('Origin') || req.get('Referer');
+    const allowedOrigins = [process.env.CLIENT_URL, 'http://localhost:3005', 'http://localhost:3000'];
+    
+    if (origin && !allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+      return res.status(403).json({ message: 'Forbidden: Invalid origin' });
+    }
+
     const { qrData } = req.body;
+    
+    // Type validation to prevent type confusion
+    if (!qrData || typeof qrData !== 'string') {
+      return res.status(400).json({ message: 'Invalid QR code: must be a string' });
+    }
     
     let registrationId, eventId;
     
-    // Handle different QR formats
+    // Handle different QR formats with proper validation
     if (qrData.includes('|')) {
       // New simple format: registrationId|eventId
-      [registrationId, eventId] = qrData.split('|');
+      const parts = qrData.split('|');
+      if (parts.length !== 2) {
+        return res.status(400).json({ message: 'Invalid QR code format' });
+      }
+      [registrationId, eventId] = parts;
     } else {
       // Try JSON format for backward compatibility
       try {

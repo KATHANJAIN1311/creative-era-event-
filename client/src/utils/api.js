@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+// Normalize the API base URL: ensure it ends with '/api'
+const rawApiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5002/api';
+const API_BASE_URL = rawApiUrl.endsWith('/api') ? rawApiUrl : `${rawApiUrl.replace(/\/$/, '')}/api`;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -21,20 +23,48 @@ api.interceptors.request.use((config) => {
 // Events API
 export const eventsAPI = {
   getAll: () => api.get('/events'),
-  getById: (id) => api.get(`/events/${id}`),
+  getById: (id) => {
+  if (!id || typeof id !== 'string') {
+    throw new Error('Invalid event ID format');
+  }
+  return api.get(`/events/${id}`);
+},
   create: (data) => api.post('/events', data),
   createWithImage: (formData) => api.post('/events', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
-  update: (id, data) => api.put(`/events/${id}`, data),
-  delete: (id) => api.delete(`/events/${id}`),
+  update: (id, data) => {
+  if (!id || typeof id !== 'string') {
+    throw new Error('Invalid event ID format');
+  }
+  return api.put(`/events/${id}`, data);
+},
+
+  delete: (id) => {
+  if (!id || typeof id !== 'string') {
+    throw new Error('Invalid event ID format');
+  }
+  return api.delete(`/events/${id}`);
+},
+
 };
 
 // Registrations API
 export const registrationsAPI = {
   create: (data) => api.post('/registrations', data),
-  getById: (id) => api.get(`/registrations/${id}`),
-  getByEvent: (eventId) => api.get(`/registrations/event/${eventId}`),
+  getById: (id) => {
+  if (!id || typeof id !== 'string') {
+    throw new Error('Invalid registration ID format');
+  }
+  return api.get(`/registrations/${id}`);
+},
+getByEvent: (eventId) => {
+  if (!eventId || typeof eventId !== 'string') {
+    throw new Error('Invalid event ID format');
+  }
+  return api.get(`/registrations/event/${eventId}`);
+},
+
   getByEmail: (email) => api.get(`/registrations/search?email=${encodeURIComponent(email)}`),
 };
 
@@ -46,9 +76,24 @@ export const checkinsAPI = {
 
 // Admin API
 export const adminAPI = {
-  getDashboard: (eventId) => api.get(`/admin/dashboard/${eventId}`),
-  exportRegistrations: (eventId) => api.get(`/admin/export/registrations/${eventId}`),
-  exportCheckins: (eventId) => api.get(`/admin/export/checkins/${eventId}`),
+  getDashboard: (eventId) => {
+  if (!eventId || typeof eventId !== 'string') {
+    throw new Error('Invalid event ID format');
+  }
+  return api.get(`/admin/dashboard/${eventId}`);
+},
+exportRegistrations: (eventId) => {
+  if (!eventId || typeof eventId !== 'string') {
+    throw new Error('Invalid event ID format');
+  }
+  return api.get(`/admin/export/registrations/${eventId}`);
+},
+exportCheckins: (eventId) => {
+  if (!eventId || typeof eventId !== 'string') {
+    throw new Error('Invalid event ID format');
+  }
+  return api.get(`/admin/export/checkins/${eventId}`);
+},
 };
 
 export default api;

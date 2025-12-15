@@ -21,13 +21,7 @@ const Events = () => {
   const fetchEvents = async () => {
     try {
       const response = await eventsAPI.getAll();
-      const eventsWithStats = await Promise.all(
-        response.data.map(async (event) => {
-          const eventDetails = await eventsAPI.getById(event.eventId);
-          return eventDetails.data;
-        })
-      );
-      setEvents(eventsWithStats);
+      setEvents(response.data);
     } catch (error) {
       console.error('Error fetching events:', error);
     } finally {
