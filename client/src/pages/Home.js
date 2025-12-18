@@ -101,109 +101,103 @@ socket.on('newCheckin', (data) => {
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_70%)]"></div>
         
-        <div className="relative z-10 max-w-6xl mx-auto text-center px-4">
+        <div className="relative z-10 max-w-6xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <div className="animate-fade-in">
-            <h1 className="text-6xl md:text-8xl font-black mb-6 hero-text leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black mb-4 sm:mb-6 hero-text leading-tight">
               Creative Era Events
             </h1>
-            <p className="text-2xl md:text-3xl mb-4 text-black font-light">
+            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-2 sm:mb-4 text-black font-light">
               Smart Event Registration &
             </p>
-            <p className="text-2xl md:text-3xl mb-12 text-black font-medium">
+            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-8 sm:mb-12 text-black font-medium">
               Automated Entry Solutions
             </p>
-            <p className="text-lg text-black mb-12 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg text-black mb-8 sm:mb-12 max-w-3xl mx-auto px-4">
               Corporate events with advanced QR check-ins, kiosk workflows, and seamless guest automation.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link to="/events" className="btn-primary">
-                <Calendar className="w-5 h-5 mr-2" />
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center px-4">
+              <Link to="/events" className="btn-primary min-h-[44px] flex items-center justify-center">
+                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Explore Events
               </Link>
-              <Link to="/corporate" className="btn-secondary">
-                <Building className="w-5 h-5 mr-2" />
+              <Link to="/corporate" className="btn-secondary min-h-[44px] flex items-center justify-center">
+                <Building className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Corporate Services
               </Link>
             </div>
           </div>
         </div>
-        
-        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-gray-400 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-gray-500 rounded-full mt-2 animate-pulse"></div>
-          </div>
-        </div>
       </div>
 
       {/* Welcome Section */}
-      <div className="bg-white py-20">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
+      <div className="bg-white py-12 sm:py-16 lg:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-black mb-4 sm:mb-6">
             WELCOME TO THE WORLD OF CREATIVE ERA
           </h2>
-          <p className="text-3xl md:text-4xl font-bold text-black mb-8 font-serif">
+          <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-6 sm:mb-8 font-serif">
             सतत रफ़्तार
           </p>
-          <button className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 px-8 rounded-lg text-lg mb-16 transition-colors">
+          <button className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-lg text-base sm:text-lg mb-12 sm:mb-16 transition-colors min-h-[44px]">
             GET STARTED!
           </button>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 max-w-6xl mx-auto mb-8 sm:mb-12">
             <div className="text-left">
-              <h3 className="text-2xl font-bold text-black mb-4">Our Mission</h3>
-              <p className="text-gray-700 leading-relaxed">
+              <h3 className="text-xl sm:text-2xl font-bold text-black mb-4">Our Mission</h3>
+              <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                 To revolutionize event management through innovative technology solutions that streamline registration, enhance attendee experience, and provide real-time insights. We are committed to delivering seamless, efficient, and secure event automation that empowers organizers to focus on creating memorable experiences.
               </p>
             </div>
             <div className="text-left">
-              <h3 className="text-2xl font-bold text-black mb-4">Our Vision</h3>
-              <p className="text-gray-700 leading-relaxed">
+              <h3 className="text-xl sm:text-2xl font-bold text-black mb-4">Our Vision</h3>
+              <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                 To become the leading provider of smart event management solutions globally, setting new standards for digital event experiences. We envision a future where every event, regardless of size or complexity, benefits from our cutting-edge technology to create meaningful connections and lasting impressions.
               </p>
             </div>
           </div>
           
-          <p className="text-lg text-gray-600 font-medium">
+          <p className="text-base sm:text-lg text-gray-600 font-medium">
             We're team players, passionate and talented experts who deliver exceptional results.
           </p>
         </div>
       </div>
 
       {/* QR-Powered Smart Entry Section */}
-      <div className="bg-white py-20 mx-4 rounded-2xl mb-20 shadow-lg border border-gray-200">
-        <div className="max-w-7xl mx-auto px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div className="bg-white py-12 sm:py-16 lg:py-20 mx-4 rounded-2xl mb-12 sm:mb-20 shadow-lg border border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
             <div>
-              <h2 className="text-4xl font-bold text-black mb-6">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-4 sm:mb-6">
                 QR-Powered Smart Entry
               </h2>
-              <p className="text-black text-lg mb-8 leading-relaxed">
+              <p className="text-black text-base sm:text-lg mb-6 sm:mb-8 leading-relaxed">
                 Say goodbye to manual registrations and long queues. Our advanced QR code system enables instant check-ins, real-time tracking, and seamless guest management. Perfect for events of any scale.
               </p>
               
-              <div className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="text-black">Instant digital ticket generation</span>
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full flex-shrink-0"></div>
+                  <span className="text-sm sm:text-base text-black">Instant digital ticket generation</span>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="text-black">Real-time attendance tracking</span>
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full flex-shrink-0"></div>
+                  <span className="text-sm sm:text-base text-black">Real-time attendance tracking</span>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="text-black">Contactless & secure verification</span>
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full flex-shrink-0"></div>
+                  <span className="text-sm sm:text-base text-black">Contactless & secure verification</span>
                 </div>
               </div>
             </div>
             
             <div className="relative">
-              <div className="bg-gray-50 rounded-2xl p-4 border-2 border-gray-200">
+              <div className="bg-gray-50 rounded-2xl p-3 sm:p-4 border-2 border-gray-200">
                 <img
                   src="https://images.unsplash.com/photo-1576267423445-b2e0074d68a4?w=800"
                   alt="Happy event attendees using QR check-in system"
-                  className="w-full h-80 object-cover rounded-xl"
+                  className="w-full h-48 sm:h-64 lg:h-80 object-cover rounded-xl"
                 />
               </div>
             </div>
@@ -212,39 +206,39 @@ socket.on('newCheckin', (data) => {
       </div>
 
       {/* Automated Kiosk Solutions Section */}
-      <div className="bg-white py-20 mx-4 rounded-2xl mb-20 shadow-lg border border-gray-200">
-        <div className="max-w-7xl mx-auto px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="relative">
-              <div className="bg-gray-50 rounded-2xl p-4 border-2 border-gray-200">
+      <div className="bg-white py-12 sm:py-16 lg:py-20 mx-4 rounded-2xl mb-12 sm:mb-20 shadow-lg border border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
+            <div className="relative order-2 lg:order-1">
+              <div className="bg-gray-50 rounded-2xl p-3 sm:p-4 border-2 border-gray-200">
                 <img
                   src="https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=800"
                   alt="Man presenting to audience in professional setting"
-                  className="w-full h-80 object-cover rounded-xl"
+                  className="w-full h-48 sm:h-64 lg:h-80 object-cover rounded-xl"
                 />
               </div>
             </div>
             
-            <div>
-              <h2 className="text-4xl font-bold text-black mb-6">
+            <div className="order-1 lg:order-2">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-4 sm:mb-6">
                 Automated Kiosk Solutions
               </h2>
-              <p className="text-black text-lg mb-8 leading-relaxed">
+              <p className="text-black text-base sm:text-lg mb-6 sm:mb-8 leading-relaxed">
                 Our self-service kiosks revolutionize event registration. Attendees can check in, print badges, and access event information independently, reducing staff workload and enhancing guest experience.
               </p>
               
-              <div className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="text-black">Self-service registration & badge printing</span>
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full flex-shrink-0"></div>
+                  <span className="text-sm sm:text-base text-black">Self-service registration & badge printing</span>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="text-black">Multi-language support</span>
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full flex-shrink-0"></div>
+                  <span className="text-sm sm:text-base text-black">Multi-language support</span>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="text-black">Custom branding & interface</span>
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full flex-shrink-0"></div>
+                  <span className="text-sm sm:text-base text-black">Custom branding & interface</span>
                 </div>
               </div>
             </div>
@@ -253,20 +247,20 @@ socket.on('newCheckin', (data) => {
       </div>
 
       {/* Creative Era Event Gallery */}
-      <div className="py-20 max-w-7xl mx-auto px-4">
-        <h2 className="text-4xl md:text-5xl font-bold text-black text-center mb-12">
+      <div className="py-12 sm:py-16 lg:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-black text-center mb-8 sm:mb-12">
           Creative Era Event Gallery
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200">
             <img
               src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800"
               alt="Corporate Conference"
-              className="w-full h-48 object-cover"
+              className="w-full h-40 sm:h-48 object-cover"
             />
-            <div className="p-6">
-              <h3 className="text-xl font-bold text-black mb-2">Corporate Conference</h3>
-              <p className="text-black">Professional business conferences with seamless technology integration</p>
+            <div className="p-4 sm:p-6">
+              <h3 className="text-lg sm:text-xl font-bold text-black mb-2">Corporate Conference</h3>
+              <p className="text-sm sm:text-base text-black">Professional business conferences with seamless technology integration</p>
             </div>
           </div>
           <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200">
@@ -306,25 +300,25 @@ socket.on('newCheckin', (data) => {
       </div>
 
       {/* Services Section */}
-      <div className="py-20 relative max-w-7xl mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
+      <div className="py-12 sm:py-16 lg:py-20 relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-black mb-4 sm:mb-6">
             Premium Event Solutions
           </h2>
-          <p className="text-xl text-black max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg lg:text-xl text-black max-w-3xl mx-auto">
             From corporate conferences to exclusive gatherings, we deliver seamless experiences
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="card-premium rounded-2xl p-8 text-center animate-fade-in">
-            <div className="w-16 h-16 gold-gradient rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Calendar className="w-8 h-8 text-black" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="card-premium rounded-2xl p-6 sm:p-8 text-center animate-fade-in">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 gold-gradient rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-black" />
             </div>
-            <h3 className="text-2xl font-bold text-navy-900 mb-4">
+            <h3 className="text-xl sm:text-2xl font-bold text-navy-900 mb-3 sm:mb-4">
               Event Registration
             </h3>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
               Seamless online registration with automated QR generation and instant WhatsApp confirmations
             </p>
           </div>
@@ -352,71 +346,6 @@ socket.on('newCheckin', (data) => {
               Real-time dashboards with attendance tracking, engagement metrics, and detailed reports
             </p>
           </div>
-        </div>
-      </div>
-
-      {/* Upcoming Events */}
-      <div className="py-20 max-w-7xl mx-auto px-4">
-        <div className="flex justify-between items-center mb-12">
-          <h2 className="text-4xl font-bold text-black">Featured Events</h2>
-          <Link
-            to="/events"
-            className="text-blue-600 hover:text-blue-800 font-medium flex items-center transition-colors"
-          >
-            View All Events
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Link>
-        </div>
-
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="card-premium rounded-2xl p-6 animate-pulse">
-                <div className="h-48 bg-white/10 rounded-xl mb-4"></div>
-                <div className="h-6 bg-white/10 rounded mb-2"></div>
-                <div className="h-4 bg-white/10 rounded mb-4"></div>
-                <div className="space-y-2">
-                  <div className="h-4 bg-white/10 rounded"></div>
-                  <div className="h-4 bg-white/10 rounded"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : events.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {events.slice(0, 6).map((event) => (
-              <EventCard key={event.eventId} event={event} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-20">
-            <Calendar className="w-20 h-20 text-gray-400 mx-auto mb-6" />
-            <h3 className="text-2xl font-semibold text-black mb-4">No Events Yet</h3>
-            <p className="text-gray-600 mb-8">Create your first event to get started.</p>
-            <Link to="/admin" className="btn-primary">
-              Create Event
-            </Link>
-          </div>
-        )}
-      </div>
-
-      {/* CTA Section */}
-      <div className="py-20 max-w-4xl mx-auto text-center px-4">
-        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-          Ready to Elevate Your Events?
-        </h2>
-        <p className="text-xl text-white/60 mb-12">
-          Join the future of event management with Creative Era Events
-        </p>
-        <div className="flex flex-col sm:flex-row gap-6 justify-center">
-          <Link to="/events" className="btn-primary">
-            <Calendar className="w-5 h-5 mr-2" />
-            Browse Events
-          </Link>
-          <Link to="/my-booking" className="btn-secondary">
-            <Users className="w-5 h-5 mr-2" />
-            My Bookings
-          </Link>
         </div>
       </div>
     </div>

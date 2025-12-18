@@ -12,7 +12,14 @@ const eventSchema = new mongoose.Schema({
   },
   date: {
     type: Date,
-    required: true
+    required: true,
+    set: function(value) {
+      // Handle string dates from form inputs
+      if (typeof value === 'string') {
+        return new Date(value);
+      }
+      return value;
+    }
   },
   time: {
     type: String,

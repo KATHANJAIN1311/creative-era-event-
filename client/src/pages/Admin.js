@@ -61,6 +61,19 @@ const Admin = () => {
     maxCapacity: 1000
   });
   const [selectedImage, setSelectedImage] = useState(null);
+  
+  // Test API connection
+  const testAPIConnection = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/health`);
+      const data = await response.json();
+      console.log('API Health Check:', data);
+      toast.success('API connection successful!');
+    } catch (error) {
+      console.error('API connection failed:', error);
+      toast.error('API connection failed!');
+    }
+  };
 
   // fetchEvents is stable in this component scope; allow it in effect without exhaustive-deps noise
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,9 +121,12 @@ const Admin = () => {
     console.log('Fetching events from:', process.env.REACT_APP_API_URL);
     const response = await eventsAPI.getAll();
     console.log('Events response:', response);
-    setEvents(Array.isArray(response.data) ? response.data : []);
-    if (response.data.length > 0 && !selectedEvent) {
-      setSelectedEvent(response.data[0]);
+    
+    const eventsData = Array.isArray(response.data) ? response.data : [];
+    setEvents(eventsData);
+    
+    if (eventsData.length > 0 && !selectedEvent) {
+      setSelectedEvent(eventsData[0]);
     }
   } catch (error) {
     console.error('Error fetching events:', error);
@@ -203,18 +219,28 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
     }
   };
 
+
+
   const handleCreateEvent = async (e) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!newEvent.name || !newEvent.date || !newEvent.time || !newEvent.venue || !newEvent.description) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    
     try {
+      let response;
       if (selectedImage) {
         const formData = new FormData();
         Object.keys(newEvent).forEach(key => {
           formData.append(key, newEvent[key]);
         });
         formData.append('image', selectedImage);
-        await eventsAPI.createWithImage(formData);
+        response = await eventsAPI.createWithImage(formData);
       } else {
-        await eventsAPI.create(newEvent);
+        response = await eventsAPI.create(newEvent);
       }
       
       toast.success('Event created successfully!');
@@ -231,7 +257,8 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
       fetchEvents();
     } catch (error) {
       console.error('Event creation error:', error);
-      toast.error('Error creating event');
+      const errorMessage = error.response?.data?.message || error.message || 'Error creating event';
+      toast.error(errorMessage);
     }
   };
 
@@ -312,48 +339,57 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
 
   if (loading) {
     return (
-      <div className="animate-pulse space-y-6">
-        <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="animate-pulse space-y-4 sm:space-y-6 p-4 sm:p-0">
+        <div className="h-6 sm:h-8 bg-gray-200 rounded w-2/3 sm:w-1/3"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-24 bg-gray-200 rounded"></div>
+            <div key={i} className="h-20 sm:h-24 bg-gray-200 rounded"></div>
           ))}
         </div>
-        <div className="h-64 bg-gray-200 rounded"></div>
+        <div className="h-48 sm:h-64 bg-gray-200 rounded"></div>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-            <BarChart3 className="w-8 h-8 mr-3 text-blue-600" />
-            Admin Dashboard
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+            <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 mr-2 sm:mr-3 text-blue-600" />
+            <span className="hidden sm:inline">Admin Dashboard</span>
+            <span className="sm:hidden">Dashboard</span>
           </h1>
-          <p className="text-gray-600 mt-1">Welcome, {admin?.username}</p>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">Welcome, {admin?.username}</p>
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 lg:space-x-4">
+          <button
+            onClick={testAPIConnection}
+            className="btn-secondary flex items-center justify-center space-x-2 min-h-[44px] text-sm"
+          >
+            <span>Test API</span>
+          </button>
           <a
             href="/checkin"
-            className="btn-secondary flex items-center space-x-2"
+            className="btn-secondary flex items-center justify-center space-x-2 min-h-[44px] text-sm"
           >
             <QrCode className="w-4 h-4" />
-            <span>QR Check-In</span>
+            <span className="hidden sm:inline">QR Check-In</span>
+            <span className="sm:hidden">Check-In</span>
           </a>
           <button
             onClick={() => setShowCreateForm(true)}
-            className="btn-primary flex items-center space-x-2"
+            className="btn-primary flex items-center justify-center space-x-2 min-h-[44px] text-sm"
           >
             <Plus className="w-4 h-4" />
-            <span>Create Event</span>
+            <span className="hidden sm:inline">Create Event</span>
+            <span className="sm:hidden">Create</span>
           </button>
           <button
             onClick={handleLogout}
-            className="btn-secondary"
+            className="btn-secondary min-h-[44px] text-sm"
           >
             Logout
           </button>
@@ -361,12 +397,12 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="bg-white rounded-lg shadow-md mb-8">
+      <div className="bg-white rounded-lg shadow-md mb-6 sm:mb-8">
         <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6">
+          <nav className="flex overflow-x-auto px-4 sm:px-6 -mb-px">
             <button
               onClick={() => setActiveTab('dashboard')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              className={`py-3 sm:py-4 px-3 sm:px-4 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap min-h-[44px] ${
                 activeTab === 'dashboard'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -376,7 +412,7 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
             </button>
             <button
               onClick={() => setActiveTab('registrations')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              className={`py-3 sm:py-4 px-3 sm:px-4 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap min-h-[44px] ${
                 activeTab === 'registrations'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -386,7 +422,7 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
             </button>
             <button
               onClick={() => setActiveTab('consultations')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              className={`py-3 sm:py-4 px-3 sm:px-4 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap min-h-[44px] ${
                 activeTab === 'consultations'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -394,15 +430,25 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
             >
               Consultations
             </button>
+            <button
+              onClick={() => setActiveTab('events')}
+              className={`py-3 sm:py-4 px-3 sm:px-4 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap min-h-[44px] ${
+                activeTab === 'events'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Events
+            </button>
           </nav>
         </div>
       </div>
 
       {/* Event Selection */}
       {events.length > 0 && (
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Select Event</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6 sm:mb-8">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Select Event</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {events.map((event) => (
               <div
                 key={event.eventId}
@@ -449,7 +495,7 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
       {activeTab === 'dashboard' && selectedEvent && dashboardData && (
         <>
           {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -500,22 +546,24 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
           </div>
 
           {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Hourly Check-ins</h3>
-              <Line data={hourlyCheckinsData} options={{ responsive: true }} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Hourly Check-ins</h3>
+              <div className="h-48 sm:h-64">
+                <Line data={hourlyCheckinsData} options={{ responsive: true, maintainAspectRatio: false }} />
+              </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Registration Types</h3>
-              <div className="h-64 flex items-center justify-center">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Registration Types</h3>
+              <div className="h-48 sm:h-64 flex items-center justify-center">
                 <Doughnut data={registrationTypeData} options={{ responsive: true, maintainAspectRatio: false }} />
               </div>
             </div>
           </div>
 
           {/* Recent Activity */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Recent Registrations</h3>
@@ -602,12 +650,12 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
       {/* Registrations Tab */}
       {activeTab === 'registrations' && selectedEvent && (
         <div>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Event Registrations - {selectedEvent.name}</h2>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-3 sm:space-y-0">
+            <h2 className="text-lg sm:text-2xl font-bold text-gray-900">Event Registrations - {selectedEvent.name}</h2>
             <select
               value={registrationFilter}
               onChange={(e) => setRegistrationFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm min-h-[44px]"
             >
               <option value="all">All Registrations</option>
               <option value="checkedIn">Checked In</option>
@@ -616,7 +664,8 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
           </div>
 
           <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -710,7 +759,8 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
     ))}
 </tbody>
 
-            </table>
+              </table>
+            </div>
             {registrations.filter(reg => {
               if (registrationFilter === 'checkedIn') return reg.isCheckedIn;
               if (registrationFilter === 'pending') return !reg.isCheckedIn;
@@ -727,15 +777,15 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
       {/* Consultations Tab */}
       {activeTab === 'consultations' && (
         <div>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Consultation Requests</h2>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-3 sm:space-y-0">
+            <h2 className="text-lg sm:text-2xl font-bold text-gray-900">Consultation Requests</h2>
             <select
               value={consultationFilter}
               onChange={(e) => {
                 setConsultationFilter(e.target.value);
                 fetchConsultations();
               }}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm min-h-[44px]"
             >
               <option value="all">All Requests</option>
               <option value="pending">Pending</option>
@@ -745,7 +795,8 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
           </div>
 
           <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -828,7 +879,8 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
                   </tr>
                 ))}
               </tbody>
-            </table>
+              </table>
+            </div>
             {consultations.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 No consultation requests found.
@@ -837,12 +889,212 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
           </div>
         </div>
       )}
+      {/* Events Tab */}
+{activeTab === 'events' && (
+  <div>
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-3 sm:space-y-0">
+      <h2 className="text-lg sm:text-2xl font-bold text-gray-900">Event Management</h2>
+      <button
+        onClick={() => setShowCreateForm(true)}
+        className="btn-primary flex items-center justify-center space-x-2 min-h-[44px] text-sm"
+      >
+        <Plus className="w-4 h-4" />
+        <span>Create Event</span>
+      </button>
+    </div>
+
+    {/* Upcoming Events */}
+    <div className="mb-6 sm:mb-8">
+      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Upcoming Events</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        {events
+          .filter(event => {
+            const eventDate = new Date(event.date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return eventDate >= today;
+          })
+          .map((event) => (
+            <div key={event.eventId} className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-200">
+              {event.imageUrl && (
+                <img
+                  src={event.imageUrl}
+                  alt={event.name}
+                  className="w-full h-32 object-cover rounded-lg mb-4"
+                />
+              )}
+              <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">{event.name}</h4>
+              <div className="space-y-2 text-sm text-gray-600 mb-4">
+                <div className="flex items-center">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  {new Date(event.date).toLocaleDateString()}
+                </div>
+                <div className="flex items-center">
+                  <Clock className="w-4 h-4 mr-2" />
+                  {event.time}
+                </div>
+                <div className="flex items-center">
+                  <MapPin className="w-4 h-4 mr-2" />
+                  {event.venue}
+                </div>
+              </div>
+              <div className="flex justify-between items-center">
+                <div className="text-sm">
+                  <span className="text-blue-600 font-medium">
+                    {event.registrationCount || 0} registered
+                  </span>
+                  <span className="text-gray-500 mx-2">•</span>
+                  <span className="text-green-600 font-medium">
+                    {event.checkedInCount || 0} checked in
+                  </span>
+                </div>
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                  <button
+                    onClick={() => setSelectedEvent(event)}
+                    className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm font-medium min-h-[44px] px-2 py-1"
+                  >
+                    View Details
+                  </button>
+                  <button
+                    onClick={() => handleDeleteEvent(event.eventId)}
+                    className="text-red-600 hover:text-red-800 text-xs sm:text-sm font-medium min-h-[44px] px-2 py-1"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+      </div>
+      {events.filter(event => {
+        const eventDate = new Date(event.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return eventDate >= today;
+      }).length === 0 && (
+        <div className="text-center py-8 text-gray-500">
+          <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <p>No upcoming events found.</p>
+        </div>
+      )}
+    </div>
+
+    {/* Past Events */}
+    <div>
+      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Past Events</h3>
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Event Name
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Date
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Venue
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Registrations
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Check-ins
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Attendance Rate
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {events
+              .filter(event => {
+                const eventDate = new Date(event.date);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return eventDate < today;
+              })
+              .map((event) => {
+                const registrations = event.registrationCount || 0;
+                const checkins = event.checkedInCount || 0;
+                const attendanceRate = registrations > 0 ? Math.round((checkins / registrations) * 100) : 0;
+                
+                return (
+                  <tr key={event.eventId}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {event.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(event.date).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {event.venue}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {registrations}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {checkins}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        attendanceRate >= 80 
+                          ? 'bg-green-100 text-green-800'
+                          : attendanceRate >= 60
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {attendanceRate}%
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-3">
+                        <button
+                          onClick={() => setSelectedEvent(event)}
+                          className="text-blue-600 hover:text-blue-900 text-xs sm:text-sm min-h-[44px] px-2 py-1"
+                        >
+                          View Details
+                        </button>
+                        <button
+                          onClick={() => handleDeleteEvent(event.eventId)}
+                          className="text-red-600 hover:text-red-900 text-xs sm:text-sm min-h-[44px] px-2 py-1"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+          </tbody>
+          </table>
+        </div>
+        {events.filter(event => {
+          const eventDate = new Date(event.date);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          return eventDate < today;
+        }).length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <p>No past events found.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+)}
+
 
       {/* Create Event Modal */}
       {showCreateForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-auto max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-black mb-6">Create New Event</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-lg mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl sm:text-2xl font-bold text-black mb-4 sm:mb-6">Create New Event</h2>
             
             <form onSubmit={handleCreateEvent} className="space-y-4">
               <div className="relative">
@@ -908,8 +1160,16 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
                 </label>
                 <input
                   type="file"
-                  accept="image/*"
-                  onChange={(e) => setSelectedImage(e.target.files[0])}
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                      setSelectedImage(file);
+                    } else {
+                      toast.error('Please select a valid image file');
+                      e.target.value = '';
+                    }
+                  }}
                   className="input-field"
                 />
                 {selectedImage && (
@@ -928,14 +1188,14 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
               
 
               
-              <div className="flex space-x-3">
-                <button type="submit" className="flex-1 btn-primary">
+              <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+                <button type="submit" className="flex-1 btn-primary min-h-[44px]">
                   Create Event
                 </button>
                 <button 
                   type="button" 
                   onClick={() => setShowCreateForm(false)}
-                  className="flex-1 btn-secondary"
+                  className="flex-1 btn-secondary min-h-[44px]"
                 >
                   Cancel
                 </button>

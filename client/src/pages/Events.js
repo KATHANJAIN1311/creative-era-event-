@@ -8,7 +8,9 @@ const Events = () => {
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('date');
+  const [locationFilter, setLocationFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
 
   useEffect(() => {
     fetchEvents();
@@ -16,7 +18,7 @@ const Events = () => {
 
   useEffect(() => {
     filterAndSortEvents();
-  }, [events, searchTerm, sortBy]);
+  }, [events, searchTerm, locationFilter, dateFilter, typeFilter]);
 
   const fetchEvents = async () => {
     try {
@@ -30,90 +32,129 @@ const Events = () => {
   };
 
   const filterAndSortEvents = () => {
-    let filtered = events.filter(event =>
-      event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.venue.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    // Sort events
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'date':
-          return new Date(a.date) - new Date(b.date);
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'registrations':
-          return (b.registrationCount || 0) - (a.registrationCount || 0);
-        default:
-          return 0;
-      }
+    let filtered = events.filter(event => {
+      // Search filter
+      const matchesSearch = event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.venue.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Location filter
+      const matchesLocation = locationFilter === 'all' || 
+        event.venue.toLowerCase().includes(locationFilter.toLowerCase());
+      
+      // Date filter
+      const eventDate = new Date(event.date);
+      const today = new Date();
+      const matchesDate = dateFilter === 'all' ||
+        (dateFilter === 'upcoming' && eventDate >= today) ||
+        (dateFilter === 'past' && eventDate < today) ||
+        (dateFilter === 'thisWeek' && eventDate >= today && eventDate <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)) ||
+        (dateFilter === 'thisMonth' && eventDate.getMonth() === today.getMonth() && eventDate.getFullYear() === today.getFullYear());
+      
+      // Type filter (based on event name/description keywords)
+      const matchesType = typeFilter === 'all' ||
+        (typeFilter === 'conference' && (event.name.toLowerCase().includes('conference') || event.description.toLowerCase().includes('conference'))) ||
+        (typeFilter === 'workshop' && (event.name.toLowerCase().includes('workshop') || event.description.toLowerCase().includes('workshop'))) ||
+        (typeFilter === 'seminar' && (event.name.toLowerCase().includes('seminar') || event.description.toLowerCase().includes('seminar'))) ||
+        (typeFilter === 'networking' && (event.name.toLowerCase().includes('networking') || event.description.toLowerCase().includes('networking')));
+      
+      return matchesSearch && matchesLocation && matchesDate && matchesType;
     });
+
+    // Sort by date (newest first)
+    filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     setFilteredEvents(filtered);
   };
 
   const upcomingEvents = filteredEvents.filter(event => new Date(event.date) >= new Date());
-  const pastEvents = filteredEvents.filter(event => new Date(event.date) < new Date());
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="mb-12">
-        <h1 className="text-5xl font-bold text-black mb-6">Discover Events</h1>
-        <p className="text-xl text-black mb-8">Find and register for amazing events near you</p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="mb-8 sm:mb-12">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black mb-4 sm:mb-6">Discover Events</h1>
+        <p className="text-lg sm:text-xl text-black mb-6 sm:mb-8">Find and register for amazing events near you</p>
         
         {/* Search and Filter */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-8">
-          <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <div className="space-y-4">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
             <input
               type="text"
-              placeholder="Search events, venues, or categories..."
+              placeholder="Search events or venues..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-field pl-12 h-14 text-lg"
+              className="input-field pl-10 sm:pl-12 h-12 sm:h-14 text-base sm:text-lg w-full"
             />
           </div>
           
-          <div className="relative">
-            <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          {/* Filter Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="input-field pl-12 pr-8 h-14 text-lg appearance-none"
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+              className="input-field h-12 sm:h-14 text-base sm:text-lg appearance-none"
             >
-              <option value="date">Sort by Date</option>
-              <option value="name">Sort by Name</option>
-              <option value="registrations">Sort by Popularity</option>
+              <option value="all">All Locations</option>
+              <option value="mumbai">Mumbai</option>
+              <option value="delhi">Delhi</option>
+              <option value="bangalore">Bangalore</option>
+              <option value="pune">Pune</option>
+              <option value="hyderabad">Hyderabad</option>
+            </select>
+            
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="input-field h-12 sm:h-14 text-base sm:text-lg appearance-none"
+            >
+              <option value="all">All Dates</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="thisWeek">This Week</option>
+              <option value="thisMonth">This Month</option>
+              <option value="past">Past Events</option>
+            </select>
+            
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="input-field h-12 sm:h-14 text-base sm:text-lg appearance-none"
+            >
+              <option value="all">All Types</option>
+              <option value="conference">Conference</option>
+              <option value="workshop">Workshop</option>
+              <option value="seminar">Seminar</option>
+              <option value="networking">Networking</option>
             </select>
           </div>
         </div>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="card-premium rounded-2xl p-6 animate-pulse">
-              <div className="h-48 bg-white/10 rounded-xl mb-4"></div>
-              <div className="h-6 bg-white/10 rounded mb-3"></div>
+            <div key={i} className="card-premium rounded-2xl p-4 sm:p-6 animate-pulse">
+              <div className="h-40 sm:h-48 bg-white/10 rounded-xl mb-4"></div>
+              <div className="h-5 sm:h-6 bg-white/10 rounded mb-3"></div>
               <div className="h-4 bg-white/10 rounded mb-4"></div>
               <div className="space-y-2">
-                <div className="h-4 bg-white/10 rounded"></div>
-                <div className="h-4 bg-white/10 rounded"></div>
+                <div className="h-3 sm:h-4 bg-white/10 rounded"></div>
+                <div className="h-3 sm:h-4 bg-white/10 rounded"></div>
               </div>
             </div>
           ))}
         </div>
       ) : (
         <>
-          {/* Upcoming Events */}
+          {/* Events */}
           {upcomingEvents.length > 0 && (
-            <div className="mb-16">
-              <h2 className="text-3xl font-bold text-black mb-8 flex items-center">
-                <Calendar className="w-8 h-8 mr-3 text-yellow-600" />
-                Upcoming Events ({upcomingEvents.length})
+            <div className="mb-12 sm:mb-16">
+              <h2 className="text-2xl sm:text-3xl font-bold text-black mb-6 sm:mb-8 flex items-center">
+                <Calendar className="w-6 h-6 sm:w-8 sm:h-8 mr-2 sm:mr-3 text-yellow-600" />
+                <span>Events ({upcomingEvents.length})</span>
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                 {upcomingEvents.map((event) => (
                   <EventCard key={event.eventId} event={event} />
                 ))}
@@ -121,23 +162,8 @@ const Events = () => {
             </div>
           )}
 
-          {/* Past Events */}
-          {pastEvents.length > 0 && (
-            <div>
-              <h2 className="text-3xl font-bold text-gray-600 mb-8 flex items-center">
-                <Calendar className="w-8 h-8 mr-3 text-gray-400" />
-                Past Events ({pastEvents.length})
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {pastEvents.map((event) => (
-                  <EventCard key={event.eventId} event={event} />
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* No Events */}
-          {filteredEvents.length === 0 && !loading && (
+          {upcomingEvents.length === 0 && !loading && (
             <div className="text-center py-20">
               <Calendar className="w-20 h-20 text-gray-300 mx-auto mb-6" />
               <h3 className="text-2xl font-semibold text-black mb-4">

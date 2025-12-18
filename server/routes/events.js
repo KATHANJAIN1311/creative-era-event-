@@ -9,7 +9,7 @@ const Registration = require('../models/Registration');
 // Configure multer for image uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, path.join(__dirname, '../uploads/'));
   },
   filename: (req, file, cb) => {
     const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
@@ -21,12 +21,8 @@ const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|webp/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-    
-    if (mimetype && extname) {
-      return cb(null, true);
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
     } else {
       cb(new Error('Only image files are allowed'));
     }
@@ -37,7 +33,22 @@ const upload = multer({
 router.get('/', async (req, res) => {
   try {
     const events = await Event.find({ isActive: true }).sort({ date: 1 });
-    res.json(events);
+    
+    // Add registration counts to each event
+    const eventsWithCounts = await Promise.all(
+      events.map(async (event) => {
+        const registrationCount = await Registration.countDocuments({ eventId: event.eventId });
+        const checkedInCount = await Registration.countDocuments({ eventId: event.eventId, isCheckedIn: true });
+        
+        return {
+          ...event.toObject(),
+          registrationCount,
+          checkedInCount
+        };
+      })
+    );
+    
+    res.json(eventsWithCounts);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -65,24 +76,18 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create new event
-router.post('/', async (req, res) => {
-  // CSRF Protection - Validate request origin
-  const origin = req.get('Origin') || req.get('Referer');
-  const allowedOrigins = [process.env.CLIENT_URL, 'http://localhost:3005', 'http://localhost:3000'];
-  
-  if (origin && !allowedOrigins.some(allowed => origin.startsWith(allowed))) {
-    return res.status(403).json({ message: 'Forbidden: Invalid origin' });
-  }
-
-  // Check if request has multipart data
+router.post('/', (req, res) => {
   const contentType = req.headers['content-type'];
   
   if (contentType && contentType.includes('multipart/form-data')) {
     // Handle file upload
     upload.single('image')(req, res, async (err) => {
       if (err) {
+        console.error('Multer error:', err.message);
         return res.status(400).json({ message: err.message });
       }
+      
+      console.log('File uploaded:', req.file);
       
       try {
         const eventId = uuidv4();
@@ -95,6 +100,11 @@ router.post('/', async (req, res) => {
           eventData.imageUrl = `/uploads/${req.file.filename}`;
         }
         
+        // Validate required fields
+        if (!eventData.name || !eventData.date || !eventData.time || !eventData.venue || !eventData.description) {
+          return res.status(400).json({ message: 'Missing required fields: name, date, time, venue, description' });
+        }
+        
         const event = new Event(eventData);
         const savedEvent = await event.save();
         res.status(201).json(savedEvent);
@@ -105,20 +115,27 @@ router.post('/', async (req, res) => {
     });
   } else {
     // Handle regular JSON data
-    try {
-      const eventId = uuidv4();
-      const eventData = {
-        eventId,
-        ...req.body
-      };
-      
-      const event = new Event(eventData);
-      const savedEvent = await event.save();
-      res.status(201).json(savedEvent);
-    } catch (error) {
-      console.error('Event creation error:', error);
-      res.status(400).json({ message: error.message });
-    }
+    (async () => {
+      try {
+        const eventId = uuidv4();
+        const eventData = {
+          eventId,
+          ...req.body
+        };
+        
+        // Validate required fields
+        if (!eventData.name || !eventData.date || !eventData.time || !eventData.venue || !eventData.description) {
+          return res.status(400).json({ message: 'Missing required fields: name, date, time, venue, description' });
+        }
+        
+        const event = new Event(eventData);
+        const savedEvent = await event.save();
+        res.status(201).json(savedEvent);
+      } catch (error) {
+        console.error('Event creation error:', error);
+        res.status(400).json({ message: error.message });
+      }
+    })();
   }
 });
 

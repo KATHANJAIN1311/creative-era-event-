@@ -72,14 +72,14 @@ const Registration = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Back Button */}
       <Link
         to={`/events/${eventId}`}
-        className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-6"
+        className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-4 sm:mb-6 min-h-[44px] px-2 py-2"
       >
         <ArrowLeft className="w-4 h-4 mr-1" />
-        Back to Event Details
+        <span className="text-sm sm:text-base">Back to Event Details</span>
       </Link>
 
       {!registration ? (
@@ -89,22 +89,22 @@ const Registration = () => {
           onSuccess={handleRegistrationSuccess}
         />
       ) : (
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 text-center">
+          <CheckCircle className="w-12 h-12 sm:w-16 sm:h-16 text-green-500 mx-auto mb-3 sm:mb-4" />
           
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
             Registration Successful!
           </h2>
           
-          <p className="text-gray-600 mb-6">
+          <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
          Your QR code has been sent to your email. You can also download it below.
         </p>
 
 
           {/* Registration Details */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <h3 className="font-semibold text-gray-900 mb-2">Registration Details</h3>
-            <div className="text-sm text-gray-600 space-y-1">
+          <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Registration Details</h3>
+            <div className="text-xs sm:text-sm text-gray-600 space-y-1">
               <p><strong>Name:</strong> {registration.name}</p>
               <p><strong>Email:</strong> {registration.email}</p>
               <p><strong>Phone:</strong> {registration.phone}</p>
@@ -113,16 +113,16 @@ const Registration = () => {
           </div>
 
           {/* QR Code Info */}
-          <div className="bg-blue-50 p-4 rounded-lg mb-6">
-            <p className="text-blue-800 text-sm">
+          <div className="bg-blue-50 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6">
+            <p className="text-blue-800 text-xs sm:text-sm">
               <strong>Your QR Code:</strong> Has been generated and sent to your Gmail.
             </p>
             <p className="text-blue-600 text-xs mt-2">
-              Registration ID: <code className="bg-blue-100 px-2 py-1 rounded">{registration.registrationId}</code>
+              Registration ID: <code className="bg-blue-100 px-2 py-1 rounded text-xs">{registration.registrationId}</code>
             </p>
             <Link 
               to={`/qr/${registration.registrationId}`}
-              className="inline-block mt-3 text-blue-600 hover:text-blue-700 text-sm font-medium"
+              className="inline-block mt-3 text-blue-600 hover:text-blue-700 text-xs sm:text-sm font-medium min-h-[44px] flex items-center justify-center"
             >
               View Your QR Code →
             </Link>
@@ -132,7 +132,7 @@ const Registration = () => {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               to={`/qr/${registration.registrationId}`}
-              className="btn-primary flex items-center justify-center space-x-2"
+              className="btn-primary flex items-center justify-center space-x-2 min-h-[44px] text-sm"
             >
               <QrCode className="w-4 h-4" />
               <span>View QR Code</span>
@@ -140,7 +140,7 @@ const Registration = () => {
             
             <button
               onClick={() => navigate('/events')}
-              className="btn-secondary flex items-center justify-center space-x-2"
+              className="btn-secondary flex items-center justify-center space-x-2 min-h-[44px] text-sm"
             >
               <Home className="w-4 h-4" />
               <span>Back to Events</span>

@@ -69,25 +69,25 @@ const RegistrationForm = ({ event, registrationType = 'online', onSuccess }) => 
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">
+    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
         Register for {event.name}
       </h2>
       
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Full Name
           </label>
           <div className="relative">
-            <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+            <User className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5 pointer-events-none" />
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
               placeholder="Enter your full name"
             />
           </div>
@@ -98,14 +98,14 @@ const RegistrationForm = ({ event, registrationType = 'online', onSuccess }) => 
             Email Address
           </label>
           <div className="relative">
-            <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+            <Mail className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5 pointer-events-none" />
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
               placeholder="Enter your email"
             />
           </div>
@@ -116,14 +116,14 @@ const RegistrationForm = ({ event, registrationType = 'online', onSuccess }) => 
             Phone Number
           </label>
           <div className="relative">
-            <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+            <Phone className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5 pointer-events-none" />
             <input
               type="tel"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
               required
-              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
               placeholder="Enter your 10-digit phone number"
               maxLength="15"
             />
@@ -133,15 +133,15 @@ const RegistrationForm = ({ event, registrationType = 'online', onSuccess }) => 
         <button
           type="submit"
           disabled={loading}
-          className="w-full btn-primary flex items-center justify-center space-x-2 py-4"
+          className="w-full btn-primary flex items-center justify-center space-x-2 py-3 sm:py-4 min-h-[44px] text-sm sm:text-base"
         >
-          {loading && <Loader className="w-5 h-5 animate-spin" />}
+          {loading && <Loader className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />}
           <span>{loading ? 'Registering...' : 'Register Now'}</span>
         </button>
       </form>
       
       {registrationType === 'online' && (
-        <p className="mt-6 text-sm text-gray-600 text-center">
+        <p className="mt-4 sm:mt-6 text-xs sm:text-sm text-gray-600 text-center">
           Your QR code will be sent to your email address after registration.
         </p>
       )}
