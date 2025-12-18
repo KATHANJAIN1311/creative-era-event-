@@ -3,6 +3,8 @@ const QRCode = require('qrcode');
 const { v4: uuidv4 } = require('uuid');
 const nodemailer = require('nodemailer');
 const Registration = require('../models/Registration');
+const Event = require('../models/Event');
+const { generateRegistrationConfirmationEmail } = require('../utils/emailTemplate');
 
 const router = express.Router();
 
@@ -60,11 +62,14 @@ router.post('/', async (req, res) => {
       req.io.emit('newRegistration', { eventId, registration: registrationData });
     }
     
-    // Send email with QR code using secure connection
+    // Send professional confirmation email
     try {
+      // Fetch event details for email
+      const eventDetails = await Event.findOne({ eventId });
+      
       const transporter = nodemailer.createTransport({
         service: 'gmail',
-        secure: true, // Use TLS
+        secure: true,
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS
@@ -74,32 +79,21 @@ router.post('/', async (req, res) => {
         }
       });
 
+      const emailHtml = generateRegistrationConfirmationEmail(
+        registrationData,
+        eventDetails,
+        qrCodeDataURL
+      );
+
       const mailOptions = {
-        from: `"Event Registration" <${process.env.EMAIL_USER}>`,
+        from: `"Creative Era Events" <${process.env.EMAIL_USER}>`,
         to: sanitizedEmail,
-        subject: `Registration Successful - ID: ${registrationId}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #333;">Hello ${sanitizedName},</h2>
-            <p>Thank you for registering for the event. Below are your registration details:</p>
-            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
-              <p><strong>Registration ID:</strong> ${registrationId}</p>
-              <p><strong>Event ID:</strong> ${eventId}</p>
-              <p><strong>Name:</strong> ${sanitizedName}</p>
-              <p><strong>Email:</strong> ${sanitizedEmail}</p>
-              <p><strong>Phone:</strong> ${sanitizedPhone}</p>
-            </div>
-            <p><strong>Your QR Code:</strong></p>
-            <div style="text-align: center; margin: 20px 0;">
-              <img src="${qrCodeDataURL}" alt="QR Code" style="border: 1px solid #ddd; padding: 10px;" />
-            </div>
-            <p style="color: #666; font-size: 14px;">Save this email for event check-in. Show the QR code at the venue for quick entry.</p>
-          </div>
-        `
+        subject: `🎉 Registration Confirmed - Welcome to ${eventDetails?.name || 'Our Event'}!`,
+        html: emailHtml
       };
 
       await transporter.sendMail(mailOptions);
-      console.log('Email sent successfully to:', sanitizedEmail);
+      console.log('Professional confirmation email sent to:', sanitizedEmail);
     } catch (emailError) {
       console.error('Email sending failed:', emailError);
       // Don't fail the registration if email fails
