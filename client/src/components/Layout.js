@@ -21,7 +21,7 @@ const Layout = ({ children }) => {
 
   return (
     <div className="min-h-screen premium-gradient">
-      <nav className="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+      <nav className="bg-black/95 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 sm:h-20">
             <div className="flex items-center">
@@ -29,10 +29,10 @@ const Layout = ({ children }) => {
                 <img 
                   src="https://creativeeraevents.com/assets/frontend-assets/images/1.site-logo.png"
                   alt="Company Logo" 
-                  className="w-10 h-8 sm:w-14 sm:h-10 rounded-xl bg-black p-1 border border-gray-800 shadow-sm"
+                  className="w-10 h-8 sm:w-14 sm:h-10 rounded-xl bg-white p-1 border border-gray-200 shadow-sm"
                 />
-                <span className="text-lg sm:text-2xl font-bold hero-text hidden sm:inline">Creative Era Events</span>
-                <span className="text-lg font-bold hero-text sm:hidden">Creative Era</span>
+                <span className="text-lg sm:text-2xl font-bold hero-text hidden sm:inline !text-white">Creative Era Events</span>
+                <span className="text-lg font-bold hero-text sm:hidden !text-white">Creative Era</span>
               </Link>
             </div>
             
@@ -48,7 +48,7 @@ const Layout = ({ children }) => {
                     className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 whitespace-nowrap min-h-[44px] ${
                       isActive
                         ? 'bg-yellow-400 text-black'
-                        : 'text-black hover:text-black hover:bg-gray-100'
+                        : 'text-white hover:text-white hover:bg-gray-800'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -61,7 +61,7 @@ const Layout = ({ children }) => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-black hover:bg-gray-100 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="md:hidden p-2 rounded-lg text-white hover:bg-gray-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -69,7 +69,7 @@ const Layout = ({ children }) => {
 
           {/* Mobile Dropdown Menu */}
           {isMenuOpen && (
-            <div className="md:hidden border-t border-gray-200 py-2">
+            <div className="md:hidden border-t border-gray-800 py-2">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.href;
@@ -81,7 +81,7 @@ const Layout = ({ children }) => {
                     className={`flex items-center space-x-3 px-4 py-3 text-base font-medium transition-all duration-300 ${
                       isActive
                         ? 'bg-yellow-400 text-black'
-                        : 'text-black hover:bg-gray-100'
+                        : 'text-white hover:bg-gray-800'
                     }`}
                   >
                     <Icon className="w-5 h-5" />

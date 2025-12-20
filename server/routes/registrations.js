@@ -18,7 +18,29 @@ router.post('/', async (req, res) => {
       return res.status(403).json({ message: 'Forbidden: Invalid origin' });
     }
 
-    const { name, email, phone, eventId, registrationType, organization, designation } = req.body;
+    const { name, email, phone, eventId, registrationType, organization, designation, ticketTier, ticketPrice } = req.body;
+    
+    // Validate ticket tier and pricing
+    const event = await Event.findOne({ eventId });
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    
+    // Validate ticket tier and price
+    if (ticketTier) {
+      const expectedPrice = event[`${ticketTier}Price`] || 0;
+      if (ticketPrice !== expectedPrice) {
+        return res.status(400).json({ message: 'Invalid ticket price' });
+      }
+      
+      // Check seat availability
+      const bookedCount = await Registration.countDocuments({ eventId, ticketTier });
+      const availableSeats = event[`${ticketTier}Seats`] || 0;
+      
+      if (bookedCount >= availableSeats) {
+        return res.status(400).json({ message: `No seats available for ${ticketTier} tier` });
+      }
+    }
     
     // Input sanitization to prevent XSS
     const sanitizedName = name ? name.replace(/[<>]/g, '') : '';
@@ -51,7 +73,9 @@ router.post('/', async (req, res) => {
       qrCode: qrCodeDataURL,
       registrationType: registrationType || 'online',
       organization: sanitizedOrganization,
-      designation: sanitizedDesignation
+      designation: sanitizedDesignation,
+      ticketTier: ticketTier || 'silver',
+      ticketPrice: ticketPrice || 0
     };
     
     const registration = new Registration(registrationData);

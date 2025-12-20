@@ -4,118 +4,118 @@ const { v4: uuidv4 } = require('uuid');
 const Registration = require('../models/Registration');
 const Checkin = require('../models/Checkin');
 
-// Check-in with QR code
+/**
+ * POST /api/checkins/verify
+ * Supports:
+ * 1) QR check-in → registrationId|eventId
+ * 2) Manual admin check-in → registrationId
+ */
 router.post('/verify', async (req, res) => {
   try {
-    // Validate request origin for CSRF protection
-    const origin = req.get('Origin') || req.get('Referer');
-    const allowedOrigins = [process.env.CLIENT_URL, 'http://localhost:3005', 'http://localhost:3000'];
-    
-    if (origin && !allowedOrigins.some(allowed => origin.startsWith(allowed))) {
-      return res.status(403).json({ message: 'Forbidden: Invalid origin' });
-    }
+    const { qrData, registrationId: manualRegistrationId } = req.body;
 
-    const { qrData } = req.body;
-    
-    // Type validation to prevent type confusion
-    if (!qrData || typeof qrData !== 'string') {
-      return res.status(400).json({ message: 'Invalid QR code: must be a string' });
-    }
-    
-    let registrationId, eventId;
-    
-    // Handle different QR formats with proper validation
-    if (qrData.includes('|')) {
-      // New simple format: registrationId|eventId
+    let registrationId;
+    let eventId;
+
+    /* ---------------- QR MODE ---------------- */
+    if (qrData) {
+      if (typeof qrData !== 'string' || !qrData.includes('|')) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid QR code format'
+        });
+      }
+
       const parts = qrData.split('|');
       if (parts.length !== 2) {
-        return res.status(400).json({ message: 'Invalid QR code format' });
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid QR code data'
+        });
       }
+
       [registrationId, eventId] = parts;
-    } else {
-      // Try JSON format for backward compatibility
-      try {
-        const parsedData = JSON.parse(qrData);
-        registrationId = parsedData.id || parsedData.registrationId;
-        eventId = parsedData.event || parsedData.eventId;
-      } catch (parseError) {
-        return res.status(400).json({ message: 'Invalid QR code format' });
+    }
+
+    /* ---------------- MANUAL ADMIN MODE ---------------- */
+    if (!qrData && manualRegistrationId) {
+      registrationId = manualRegistrationId;
+
+      // Find registration to get eventId
+      const reg = await Registration.findOne({ registrationId });
+      if (!reg) {
+        return res.status(404).json({
+          success: false,
+          message: 'Registration not found'
+        });
       }
+
+      eventId = reg.eventId;
     }
-    
+
     if (!registrationId || !eventId) {
-      return res.status(400).json({ message: 'Invalid QR code data' });
-    }
-    
-    // Find registration
-    const registration = await Registration.findOne({ registrationId, eventId });
-    if (!registration) {
-      return res.status(404).json({ message: 'Registration not found' });
-    }
-    
-    // Check if already checked in
-    if (registration.isCheckedIn) {
-      return res.status(400).json({ 
-        message: 'Already checked in',
-        registration,
-        alreadyCheckedIn: true
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid check-in data'
       });
     }
-    
-    // Create check-in record
-    const checkinId = uuidv4();
+
+    /* ---------------- FIND REGISTRATION ---------------- */
+    const registration = await Registration.findOne({ registrationId, eventId });
+    if (!registration) {
+      return res.status(404).json({
+        success: false,
+        message: 'Registration not found'
+      });
+    }
+
+    /* ---------------- ALREADY CHECKED IN ---------------- */
+    if (registration.isCheckedIn) {
+      return res.status(200).json({
+        success: false,
+        alreadyCheckedIn: true,
+        message: 'User already checked in',
+        registration
+      });
+    }
+
+    /* ---------------- CREATE CHECKIN ---------------- */
     const checkin = new Checkin({
-      checkinId,
+      checkinId: uuidv4(),
       registrationId,
       eventId
     });
-    
+
     await checkin.save();
-    
-    // Update registration status
-    await Registration.findOneAndUpdate(
-      { registrationId },
-      { isCheckedIn: true }
-    );
-    
-    // Emit real-time update
-    req.io.emit('newCheckin', {
-      eventId,
-      checkedInCount: await Registration.countDocuments({ eventId, isCheckedIn: true })
-    });
-    
-    res.json({
-      message: 'Check-in successful',
-      registration: {
-        ...registration.toObject(),
+
+    registration.isCheckedIn = true;
+    registration.checkedAt = new Date();
+    await registration.save();
+
+    /* ---------------- REALTIME UPDATE ---------------- */
+    if (req.io) {
+      const checkedInCount = await Registration.countDocuments({
+        eventId,
         isCheckedIn: true
-      },
+      });
+
+      req.io.emit('newCheckin', { eventId, checkedInCount });
+    }
+
+    /* ---------------- SUCCESS RESPONSE ---------------- */
+    res.status(200).json({
+      success: true,
+      message: 'Check-in successful',
+      registration,
       checkin
     });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
 
-// Get check-ins for event
-router.get('/event/:eventId', async (req, res) => {
-  try {
-    const checkins = await Checkin.find({ eventId: req.params.eventId })
-      .sort({ checkinTime: -1 });
-    
-    const checkinsWithDetails = await Promise.all(
-      checkins.map(async (checkin) => {
-        const registration = await Registration.findOne({ registrationId: checkin.registrationId });
-        return {
-          ...checkin.toObject(),
-          registration
-        };
-      })
-    );
-    
-    res.json(checkinsWithDetails);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Check-in error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during check-in'
+    });
   }
 });
 

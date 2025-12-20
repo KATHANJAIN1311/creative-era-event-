@@ -58,7 +58,8 @@ const Admin = () => {
     time: '',
     venue: '',
     description: '',
-    maxCapacity: 1000
+    maxCapacity: 1000,
+    ticketTiers: []
   });
   const [selectedImage, setSelectedImage] = useState(null);
   
@@ -251,7 +252,8 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
         time: '',
         venue: '',
         description: '',
-        maxCapacity: 1000
+        maxCapacity: 1000,
+        ticketTiers: []
       });
       setSelectedImage(null);
       fetchEvents();
@@ -365,12 +367,6 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
         </div>
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 lg:space-x-4">
-          <button
-            onClick={testAPIConnection}
-            className="btn-secondary flex items-center justify-center space-x-2 min-h-[44px] text-sm"
-          >
-            <span>Test API</span>
-          </button>
           <a
             href="/checkin"
             className="btn-secondary flex items-center justify-center space-x-2 min-h-[44px] text-sm"
@@ -1184,6 +1180,73 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
                     />
                   </div>
                 )}
+              </div>
+              
+              {/* Ticket Pricing Section */}
+              <div className="border-t pt-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Ticket Pricing (Optional)</h3>
+                  <button
+                    type="button"
+                    onClick={() => setNewEvent({...newEvent, ticketTiers: [...newEvent.ticketTiers, { name: '', price: 0, seats: 0 }]})}
+                    className="btn-secondary text-sm"
+                  >
+                    + Add Tier
+                  </button>
+                </div>
+                
+                {newEvent.ticketTiers.map((tier, index) => (
+                  <div key={index} className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-3 p-3 border rounded-lg">
+                    <input
+                      type="text"
+                      placeholder="Tier Name (e.g., VIP, General)"
+                      value={tier.name}
+                      onChange={(e) => {
+                        const updatedTiers = [...newEvent.ticketTiers];
+                        updatedTiers[index].name = e.target.value;
+                        setNewEvent({...newEvent, ticketTiers: updatedTiers});
+                      }}
+                      className="input-field"
+                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                      <input
+                        type="number"
+                        placeholder="Price"
+                        value={tier.price}
+                        onChange={(e) => {
+                          const updatedTiers = [...newEvent.ticketTiers];
+                          updatedTiers[index].price = parseInt(e.target.value) || 0;
+                          setNewEvent({...newEvent, ticketTiers: updatedTiers});
+                        }}
+                        className="input-field pl-8"
+                        min="0"
+                      />
+                    </div>
+                    <input
+                      type="number"
+                      placeholder="Seats"
+                      value={tier.seats}
+                      onChange={(e) => {
+                        const updatedTiers = [...newEvent.ticketTiers];
+                        updatedTiers[index].seats = parseInt(e.target.value) || 0;
+                        setNewEvent({...newEvent, ticketTiers: updatedTiers});
+                      }}
+                      className="input-field"
+                      min="0"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updatedTiers = newEvent.ticketTiers.filter((_, i) => i !== index);
+                        setNewEvent({...newEvent, ticketTiers: updatedTiers});
+                      }}
+                      className="btn-secondary text-red-600 hover:bg-red-50"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
               </div>
               
 

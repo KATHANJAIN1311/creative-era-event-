@@ -8,7 +8,6 @@ const MyBooking = () => {
   const [error, setError] = useState('');
   const [searched, setSearched] = useState(false);
   const [showQRCodes, setShowQRCodes] = useState({});
-  const [testResult, setTestResult] = useState(null);
 
   const handleSearch = async () => {
     if (!email.trim()) {
@@ -46,17 +45,7 @@ const MyBooking = () => {
     }
   };
 
-  const testConnection = async () => {
-    try {
-      const response = await fetch('/api/registrations/test/connection');
-      const data = await response.json();
-      setTestResult(data);
-      setTimeout(() => setTestResult(null), 5000);
-    } catch (error) {
-      setTestResult({ success: false, message: 'Connection failed', error: error.message });
-      setTimeout(() => setTestResult(null), 5000);
-    }
-  };
+
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
@@ -98,23 +87,6 @@ const MyBooking = () => {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-black mb-2">My Registrations</h1>
           <p className="text-black">Enter your email to view your event registrations</p>
-          
-          {/* Test Connection Button */}
-          <button
-            onClick={testConnection}
-            className="mt-4 text-sm text-blue-600 hover:text-blue-800 underline"
-          >
-            Test API Connection
-          </button>
-          
-          {/* Test Result */}
-          {testResult && (
-            <div className={`mt-2 p-2 rounded text-sm ${
-              testResult.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
-              {testResult.message} {testResult.totalRegistrations !== undefined && `(${testResult.totalRegistrations} total registrations)`}
-            </div>
-          )}
         </div>
 
         {/* Search Form */}
@@ -180,7 +152,7 @@ const MyBooking = () => {
                   </div>
                   <div className="flex items-center text-black">
                     <Phone className="w-4 h-4 mr-2" />
-                    <span className="text-sm">{registration.phone}</span>
+                    <span className="text-sm">{registration.phoneNumber || registration.phone}</span>
                   </div>
                   <div className="flex items-center text-black">
                     <Calendar className="w-4 h-4 mr-2" />
@@ -234,12 +206,20 @@ const MyBooking = () => {
                   
                   {showQRCodes[registration.registrationId] && (
                     <div className="mt-4 p-4 bg-gray-50 rounded-lg text-center">
-                      <div className="text-xs text-gray-500 mb-2">QR Code Data:</div>
-                      <div className="font-mono text-sm bg-white p-2 rounded border">
-                        {registration.qrCode}
-                      </div>
+                      <div className="text-xs text-gray-500 mb-2">Your QR Code:</div>
+                      {registration.qrCode ? (
+                        <div className="bg-white p-4 rounded-lg inline-block">
+                          <img 
+                            src={registration.qrCode} 
+                            alt="Registration QR Code" 
+                            className="w-48 h-48 mx-auto"
+                          />
+                        </div>
+                      ) : (
+                        <div className="text-red-500 text-sm">QR Code not available</div>
+                      )}
                       <div className="text-xs text-gray-500 mt-2">
-                        Show this at the event for check-in
+                        Show this QR code at the event for check-in
                       </div>
                     </div>
                   )}

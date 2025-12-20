@@ -44,7 +44,12 @@ const eventSchema = new mongoose.Schema({
   maxCapacity: {
     type: Number,
     default: 1000
-  }
+  },
+  ticketTiers: [{
+    name: { type: String, required: true },
+    price: { type: Number, required: true },
+    seats: { type: Number, required: true }
+  }]
 }, {
   timestamps: true
 });

@@ -11,6 +11,7 @@ const registrationRoutes = require('./routes/registrations');
 const checkinRoutes = require('./routes/checkins');
 const consultationRoutes = require('./routes/consultations');
 const adminRoutes = require('./routes/admin');
+const bookingRoutes = require('./routes/bookings');
 
 const app = express();
 const server = http.createServer(app);
@@ -59,6 +60,7 @@ app.use('/api/registrations', registrationRoutes);
 app.use('/api/checkins', checkinRoutes);
 app.use('/api/consultations', consultationRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/event-registration')

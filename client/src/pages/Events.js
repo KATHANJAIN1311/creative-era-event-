@@ -9,7 +9,7 @@ const Events = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('all');
-  const [dateFilter, setDateFilter] = useState('all');
+  const [specificDate, setSpecificDate] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
 
   useEffect(() => {
@@ -18,7 +18,7 @@ const Events = () => {
 
   useEffect(() => {
     filterAndSortEvents();
-  }, [events, searchTerm, locationFilter, dateFilter, typeFilter]);
+  }, [events, searchTerm, locationFilter, specificDate, typeFilter]);
 
   const fetchEvents = async () => {
     try {
@@ -44,12 +44,7 @@ const Events = () => {
       
       // Date filter
       const eventDate = new Date(event.date);
-      const today = new Date();
-      const matchesDate = dateFilter === 'all' ||
-        (dateFilter === 'upcoming' && eventDate >= today) ||
-        (dateFilter === 'past' && eventDate < today) ||
-        (dateFilter === 'thisWeek' && eventDate >= today && eventDate <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)) ||
-        (dateFilter === 'thisMonth' && eventDate.getMonth() === today.getMonth() && eventDate.getFullYear() === today.getFullYear());
+      const matchesDate = !specificDate || eventDate.toDateString() === new Date(specificDate).toDateString();
       
       // Type filter (based on event name/description keywords)
       const matchesType = typeFilter === 'all' ||
@@ -104,17 +99,13 @@ const Events = () => {
               <option value="hyderabad">Hyderabad</option>
             </select>
             
-            <select
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="input-field h-12 sm:h-14 text-base sm:text-lg appearance-none"
-            >
-              <option value="all">All Dates</option>
-              <option value="upcoming">Upcoming</option>
-              <option value="thisWeek">This Week</option>
-              <option value="thisMonth">This Month</option>
-              <option value="past">Past Events</option>
-            </select>
+            <input
+              type="date"
+              value={specificDate}
+              onChange={(e) => setSpecificDate(e.target.value)}
+              className="input-field h-12 sm:h-14 text-base sm:text-lg w-full"
+              placeholder="Select specific date"
+            />
             
             <select
               value={typeFilter}

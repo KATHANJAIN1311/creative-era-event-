@@ -15,6 +15,12 @@ const QRDisplay = () => {
   }, [registrationId]);
 
   const fetchRegistration = async () => {
+    if (!registrationId) {
+      setError('No registration ID provided');
+      setLoading(false);
+      return;
+    }
+    
     try {
       console.log('Fetching registration with ID:', registrationId);
       const response = await registrationsAPI.getById(registrationId);

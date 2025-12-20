@@ -7,6 +7,7 @@ const EventDetails = () => {
   const { eventId } = useParams();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedTier, setSelectedTier] = useState(null);
 
   useEffect(() => {
     fetchEvent();
@@ -147,6 +148,98 @@ const EventDetails = () => {
             </div>
           </div>
 
+          {/* Ticket Pricing Section */}
+          {isUpcoming && (event.silverPrice > 0 || event.platinumPrice > 0 || event.goldPrice > 0) && (
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-black mb-4">Select Ticket Tier</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Silver Tier */}
+                {event.silverPrice > 0 && (
+                  <div 
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      selectedTier === 'silver' 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => setSelectedTier('silver')}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900">Silver</h3>
+                      <input 
+                        type="radio" 
+                        name="ticketTier" 
+                        value="silver" 
+                        checked={selectedTier === 'silver'}
+                        onChange={() => setSelectedTier('silver')}
+                        className="text-blue-600"
+                      />
+                    </div>
+                    <p className="text-2xl font-bold text-blue-600 mb-2">₹{event.silverPrice}</p>
+                    <p className="text-sm text-gray-600">
+                      Seats: {Math.max(0, event.silverSeats - (event.silverBooked || 0))} left
+                    </p>
+                  </div>
+                )}
+                
+                {/* Platinum Tier */}
+                {event.platinumPrice > 0 && (
+                  <div 
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      selectedTier === 'platinum' 
+                        ? 'border-purple-500 bg-purple-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => setSelectedTier('platinum')}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900">Platinum</h3>
+                      <input 
+                        type="radio" 
+                        name="ticketTier" 
+                        value="platinum" 
+                        checked={selectedTier === 'platinum'}
+                        onChange={() => setSelectedTier('platinum')}
+                        className="text-purple-600"
+                      />
+                    </div>
+                    <p className="text-2xl font-bold text-purple-600 mb-2">₹{event.platinumPrice}</p>
+                    <p className="text-sm text-gray-600">
+                      Seats: {Math.max(0, event.platinumSeats - (event.platinumBooked || 0))} left
+                    </p>
+                  </div>
+                )}
+                
+                {/* Gold Tier */}
+                {event.goldPrice > 0 && (
+                  <div 
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      selectedTier === 'gold' 
+                        ? 'border-yellow-500 bg-yellow-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => setSelectedTier('gold')}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900">Gold</h3>
+                      <input 
+                        type="radio" 
+                        name="ticketTier" 
+                        value="gold" 
+                        checked={selectedTier === 'gold'}
+                        onChange={() => setSelectedTier('gold')}
+                        className="text-yellow-600"
+                      />
+                    </div>
+                    <p className="text-2xl font-bold text-yellow-600 mb-2">₹{event.goldPrice}</p>
+                    <p className="text-sm text-gray-600">
+                      Seats: {Math.max(0, event.goldSeats - (event.goldBooked || 0))} left
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Event Description */}
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-black mb-3">About This Event</h2>
@@ -158,15 +251,20 @@ const EventDetails = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 to={`/events/${event.eventId}/register`}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-3 px-6 rounded-lg font-medium transition-colors duration-200"
+                state={{ selectedTier }}
+                className={`flex-1 text-center py-3 px-6 rounded-lg font-medium transition-colors duration-200 ${
+                  selectedTier 
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+                onClick={(e) => {
+                  if (!selectedTier && (event.silverPrice > 0 || event.platinumPrice > 0 || event.goldPrice > 0)) {
+                    e.preventDefault();
+                    alert('Please select a ticket tier first');
+                  }
+                }}
               >
-                Register Online
-              </Link>
-              <Link
-                to={`/kiosk/${event.eventId}`}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 text-center py-3 px-6 rounded-lg font-medium transition-colors duration-200"
-              >
-                Kiosk Registration
+                Book Now
               </Link>
             </div>
           )}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { eventsAPI } from '../utils/api';
 import RegistrationForm from '../components/RegistrationForm';
 import { QRCodeSVG } from 'qrcode.react';
@@ -8,9 +8,11 @@ import { ArrowLeft, Share2, CheckCircle, Home, QrCode } from 'lucide-react';
 const Registration = () => {
   const { eventId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [registration, setRegistration] = useState(null);
+  const selectedTier = location.state?.selectedTier;
 
   useEffect(() => {
     fetchEvent();
@@ -86,6 +88,7 @@ const Registration = () => {
         <RegistrationForm 
           event={event} 
           registrationType="online"
+          selectedTier={selectedTier}
           onSuccess={handleRegistrationSuccess}
         />
       ) : (

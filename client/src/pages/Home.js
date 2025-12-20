@@ -97,7 +97,7 @@ socket.on('newCheckin', (data) => {
   return (
     <div>
       {/* Hero Section */}
-      <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <div className="relative h-96 sm:h-[500px] lg:h-[600px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_70%)]"></div>
         
@@ -115,23 +115,13 @@ socket.on('newCheckin', (data) => {
             <p className="text-base sm:text-lg text-black mb-8 sm:mb-12 max-w-3xl mx-auto px-4">
               Corporate events with advanced QR check-ins, kiosk workflows, and seamless guest automation.
             </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center px-4">
-              <Link to="/events" className="btn-primary min-h-[44px] flex items-center justify-center">
-                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                Explore Events
-              </Link>
-              <Link to="/corporate" className="btn-secondary min-h-[44px] flex items-center justify-center">
-                <Building className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                Corporate Services
-              </Link>
-            </div>
+
           </div>
         </div>
       </div>
 
       {/* Welcome Section */}
-      <div className="bg-white py-12 sm:py-16 lg:py-20">
+      <div className="bg-white py-6 sm:py-8 lg:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-black mb-4 sm:mb-6">
             WELCOME TO THE WORLD OF CREATIVE ERA
@@ -139,9 +129,7 @@ socket.on('newCheckin', (data) => {
           <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-6 sm:mb-8 font-serif">
             सतत रफ़्तार
           </p>
-          <button className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-lg text-base sm:text-lg mb-12 sm:mb-16 transition-colors min-h-[44px]">
-            GET STARTED!
-          </button>
+
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 max-w-6xl mx-auto mb-8 sm:mb-12">
             <div className="text-left">
@@ -254,28 +242,6 @@ socket.on('newCheckin', (data) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200">
             <img
-              src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800"
-              alt="Corporate Conference"
-              className="w-full h-40 sm:h-48 object-cover"
-            />
-            <div className="p-4 sm:p-6">
-              <h3 className="text-lg sm:text-xl font-bold text-black mb-2">Corporate Conference</h3>
-              <p className="text-sm sm:text-base text-black">Professional business conferences with seamless technology integration</p>
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200">
-            <img
-              src="https://images.unsplash.com/photo-1511578314322-379afb476865?w=800"
-              alt="Exhibition Hall"
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Exhibition Management</h3>
-              <p className="text-gray-600">Large-scale exhibitions with automated entry and visitor tracking</p>
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200">
-            <img
               src="https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800"
               alt="Networking Event"
               className="w-full h-48 object-cover"
@@ -287,13 +253,35 @@ socket.on('newCheckin', (data) => {
           </div>
           <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200">
             <img
-              src="https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=800"
-              alt="Award Ceremony"
+              src="https://creativeeraevents.com/assets/admin-assets/images/gallery/1690535698.JPG"
+              alt="Creative Era Event"
               className="w-full h-48 object-cover"
             />
             <div className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Award Ceremonies</h3>
-              <p className="text-gray-600">Elegant award ceremonies with professional event coordination</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Creative Era Event</h3>
+              <p className="text-gray-600">Professional event management with creative solutions</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+            <img
+              src="https://creativeeraevents.com/assets/admin-assets/images/gallery/1690535648.JPG"
+              alt="Corporate Gathering"
+              className="w-full h-48 object-cover"
+            />
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Corporate Gathering</h3>
+              <p className="text-gray-600">Exclusive corporate events with premium service delivery</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+            <img
+              src="https://creativeeraevents.com/assets/admin-assets/images/gallery/1690535735.JPG"
+              alt="Special Event"
+              className="w-full h-48 object-cover"
+            />
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Special Event</h3>
+              <p className="text-gray-600">Memorable special events with attention to detail</p>
             </div>
           </div>
         </div>

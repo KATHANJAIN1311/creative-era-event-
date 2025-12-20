@@ -3,13 +3,23 @@ import { registrationsAPI } from '../utils/api';
 import toast from 'react-hot-toast';
 import { User, Mail, Phone, Loader } from 'lucide-react';
 
-const RegistrationForm = ({ event, registrationType = 'online', onSuccess }) => {
+const RegistrationForm = ({ event, registrationType = 'online', selectedTier, onSuccess }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: ''
   });
   const [loading, setLoading] = useState(false);
+
+  const getTicketPrice = () => {
+    if (!selectedTier) return 0;
+    switch (selectedTier) {
+      case 'silver': return event.silverPrice || 0;
+      case 'platinum': return event.platinumPrice || 0;
+      case 'gold': return event.goldPrice || 0;
+      default: return 0;
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -43,7 +53,9 @@ const RegistrationForm = ({ event, registrationType = 'online', onSuccess }) => 
         ...formData,
         phone: formData.phone.replace(/\D/g, ''),
         eventId: event.eventId,
-        registrationType
+        registrationType,
+        ticketTier: selectedTier || 'silver',
+        ticketPrice: getTicketPrice()
       };
 
       const response = await registrationsAPI.create(registrationData);
@@ -73,6 +85,18 @@ const RegistrationForm = ({ event, registrationType = 'online', onSuccess }) => 
       <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
         Register for {event.name}
       </h2>
+      
+      {/* Ticket Tier Display */}
+      {selectedTier && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <h3 className="text-lg font-semibold text-blue-900 mb-2">
+            Selected Tier: {selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}
+          </h3>
+          <p className="text-2xl font-bold text-blue-600">
+            ₹{getTicketPrice()}
+          </p>
+        </div>
+      )}
       
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         <div>

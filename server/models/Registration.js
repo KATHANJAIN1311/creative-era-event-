@@ -15,6 +15,8 @@ const registrationSchema = new mongoose.Schema({
   phoneNumber: { type: String, required: true },
   qrCode: { type: String, required: true },
   registrationType: { type: String, enum: ['online', 'kiosk'], default: 'online' },
+  ticketTier: { type: String, default: '' },
+  ticketPrice: { type: Number, default: 0 },
   organization: { type: String, default: '' },
   designation: { type: String, default: '' },
   isCheckedIn: { type: Boolean, default: false },

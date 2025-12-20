@@ -65,10 +65,18 @@ router.get('/:id', async (req, res) => {
     const registrationCount = await Registration.countDocuments({ eventId: req.params.id });
     const checkedInCount = await Registration.countDocuments({ eventId: req.params.id, isCheckedIn: true });
     
+    // Get booked seats by tier
+    const silverBooked = await Registration.countDocuments({ eventId: req.params.id, ticketTier: 'silver' });
+    const platinumBooked = await Registration.countDocuments({ eventId: req.params.id, ticketTier: 'platinum' });
+    const goldBooked = await Registration.countDocuments({ eventId: req.params.id, ticketTier: 'gold' });
+    
     res.json({
       ...event.toObject(),
       registrationCount,
-      checkedInCount
+      checkedInCount,
+      silverBooked,
+      platinumBooked,
+      goldBooked
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
