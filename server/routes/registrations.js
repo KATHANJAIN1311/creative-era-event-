@@ -28,17 +28,20 @@ router.post('/', async (req, res) => {
     
     // Validate ticket tier and price
     if (ticketTier) {
-      const expectedPrice = event[`${ticketTier}Price`] || 0;
-      if (ticketPrice !== expectedPrice) {
+      const tier = event.ticketTiers.find(t => t.name.toLowerCase() === ticketTier.toLowerCase());
+      if (!tier) {
+        return res.status(400).json({ message: 'Invalid ticket tier' });
+      }
+      
+      if (ticketPrice !== tier.price) {
         return res.status(400).json({ message: 'Invalid ticket price' });
       }
       
       // Check seat availability
       const bookedCount = await Registration.countDocuments({ eventId, ticketTier });
-      const availableSeats = event[`${ticketTier}Seats`] || 0;
       
-      if (bookedCount >= availableSeats) {
-        return res.status(400).json({ message: `No seats available for ${ticketTier} tier` });
+      if (bookedCount >= tier.seats) {
+        return res.status(400).json({ message: `No seats available for ${tier.name} tier` });
       }
     }
     
@@ -74,7 +77,7 @@ router.post('/', async (req, res) => {
       registrationType: registrationType || 'online',
       organization: sanitizedOrganization,
       designation: sanitizedDesignation,
-      ticketTier: ticketTier || 'silver',
+      ticketTier: ticketTier || (event.ticketTiers.length > 0 ? event.ticketTiers[0].name : 'general'),
       ticketPrice: ticketPrice || 0
     };
     

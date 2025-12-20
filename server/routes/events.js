@@ -104,6 +104,15 @@ router.post('/', (req, res) => {
           ...req.body
         };
         
+        // Parse ticketTiers if it's a string
+        if (typeof eventData.ticketTiers === 'string') {
+          try {
+            eventData.ticketTiers = JSON.parse(eventData.ticketTiers);
+          } catch (parseError) {
+            eventData.ticketTiers = [];
+          }
+        }
+        
         if (req.file) {
           eventData.imageUrl = `/uploads/${req.file.filename}`;
         }

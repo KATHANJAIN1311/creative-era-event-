@@ -12,13 +12,9 @@ const RegistrationForm = ({ event, registrationType = 'online', selectedTier, on
   const [loading, setLoading] = useState(false);
 
   const getTicketPrice = () => {
-    if (!selectedTier) return 0;
-    switch (selectedTier) {
-      case 'silver': return event.silverPrice || 0;
-      case 'platinum': return event.platinumPrice || 0;
-      case 'gold': return event.goldPrice || 0;
-      default: return 0;
-    }
+    if (!selectedTier || !event.ticketTiers) return 0;
+    const tier = event.ticketTiers.find(t => t.name.toLowerCase() === selectedTier.toLowerCase());
+    return tier ? tier.price : 0;
   };
 
   const handleChange = (e) => {
@@ -54,7 +50,7 @@ const RegistrationForm = ({ event, registrationType = 'online', selectedTier, on
         phone: formData.phone.replace(/\D/g, ''),
         eventId: event.eventId,
         registrationType,
-        ticketTier: selectedTier || 'silver',
+        ticketTier: selectedTier || (event.ticketTiers?.length > 0 ? event.ticketTiers[0].name : 'general'),
         ticketPrice: getTicketPrice()
       };
 

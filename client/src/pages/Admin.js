@@ -236,7 +236,11 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
       if (selectedImage) {
         const formData = new FormData();
         Object.keys(newEvent).forEach(key => {
-          formData.append(key, newEvent[key]);
+          if (key === 'ticketTiers') {
+            formData.append(key, JSON.stringify(newEvent[key]));
+          } else {
+            formData.append(key, newEvent[key]);
+          }
         });
         formData.append('image', selectedImage);
         response = await eventsAPI.createWithImage(formData);

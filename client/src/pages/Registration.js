@@ -108,10 +108,10 @@ const Registration = () => {
           <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
             <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Registration Details</h3>
             <div className="text-xs sm:text-sm text-gray-600 space-y-1">
-              <p><strong>Name:</strong> {registration.name}</p>
-              <p><strong>Email:</strong> {registration.email}</p>
-              <p><strong>Phone:</strong> {registration.phone}</p>
-              <p><strong>Registration ID:</strong> {registration.registrationId}</p>
+              <p><strong>Name:</strong> {registration.registration?.name || registration.name}</p>
+              <p><strong>Email:</strong> {registration.registration?.email || registration.email}</p>
+              <p><strong>Phone:</strong> {registration.registration?.phone || registration.phone}</p>
+              <p><strong>Registration ID:</strong> {registration.registration?.registrationId || registration.registrationId}</p>
             </div>
           </div>
 
@@ -121,10 +121,10 @@ const Registration = () => {
               <strong>Your QR Code:</strong> Has been generated and sent to your Gmail.
             </p>
             <p className="text-blue-600 text-xs mt-2">
-              Registration ID: <code className="bg-blue-100 px-2 py-1 rounded text-xs">{registration.registrationId}</code>
+              Registration ID: <code className="bg-blue-100 px-2 py-1 rounded text-xs">{registration.registration?.registrationId || registration.registrationId}</code>
             </p>
             <Link 
-              to={`/qr/${registration.registrationId}`}
+              to={`/qr/${registration.registration?.registrationId || registration.registrationId}`}
               className="inline-block mt-3 text-blue-600 hover:text-blue-700 text-xs sm:text-sm font-medium min-h-[44px] flex items-center justify-center"
             >
               View Your QR Code →
@@ -134,7 +134,7 @@ const Registration = () => {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              to={`/qr/${registration.registrationId}`}
+              to={`/qr/${registration.registration?.registrationId || registration.registrationId}`}
               className="btn-primary flex items-center justify-center space-x-2 min-h-[44px] text-sm"
             >
               <QrCode className="w-4 h-4" />

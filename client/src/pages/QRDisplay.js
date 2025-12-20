@@ -25,10 +25,19 @@ const QRDisplay = () => {
       console.log('Fetching registration with ID:', registrationId);
       const response = await registrationsAPI.getById(registrationId);
       console.log('Registration response:', response);
-      setRegistration(response.data);
+      
+      if (response.data) {
+        setRegistration(response.data);
+      } else {
+        setError('Registration data not found');
+      }
     } catch (error) {
       console.error('Registration fetch error:', error);
-      setError('Registration not found');
+      if (error.response?.status === 404) {
+        setError('Registration not found');
+      } else {
+        setError('Failed to load registration');
+      }
     } finally {
       setLoading(false);
     }
