@@ -1,7 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import Layout from './components/Layout';
+import UserLayout from './components/UserLayout';
+import AdminLayout from './components/AdminLayout';
 import Home from './pages/Home';
 import Events from './pages/Events';
 import EventDetails from './pages/EventDetails';
@@ -19,23 +20,26 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="/events/:eventId" element={<EventDetails />} />
-            <Route path="/events/:eventId/register" element={<Registration />} />
-            <Route path="/qr/:registrationId" element={<QRDisplay />} />
-            <Route path="/corporate" element={<Corporate />} />
-            <Route path="/schedule-consultation" element={<ScheduleConsultation />} />
-            <Route path="/my-booking" element={<MyBooking />} />
-            <Route path="/kiosk" element={<Kiosk />} />
-            <Route path="/kiosk/:eventId" element={<Kiosk />} />
-            <Route path="/scanner" element={<Scanner />} />
-            <Route path="/checkin" element={<CheckIn />} />
-            <Route path="/admin" element={<Admin />} />
-          </Routes>
-        </Layout>
+        <Routes>
+          {/* User Routes */}
+          <Route path="/" element={<UserLayout><Home /></UserLayout>} />
+          <Route path="/events" element={<UserLayout><Events /></UserLayout>} />
+          <Route path="/events/:eventId" element={<UserLayout><EventDetails /></UserLayout>} />
+          <Route path="/events/:eventId/register" element={<UserLayout><Registration /></UserLayout>} />
+          <Route path="/qr/:registrationId" element={<UserLayout><QRDisplay /></UserLayout>} />
+          <Route path="/corporate" element={<UserLayout><Corporate /></UserLayout>} />
+          <Route path="/schedule-consultation" element={<UserLayout><ScheduleConsultation /></UserLayout>} />
+          <Route path="/my-booking" element={<UserLayout><MyBooking /></UserLayout>} />
+          
+          {/* Kiosk Routes (no layout) */}
+          <Route path="/kiosk" element={<Kiosk />} />
+          <Route path="/kiosk/:eventId" element={<Kiosk />} />
+          <Route path="/scanner" element={<Scanner />} />
+          <Route path="/checkin" element={<CheckIn />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminLayout><Admin /></AdminLayout>} />
+        </Routes>
         
         <Toaster
           position="top-right"

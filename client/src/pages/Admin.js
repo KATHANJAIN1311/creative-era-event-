@@ -1209,7 +1209,7 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
                       className="input-field"
                     />
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10">₹</span>
                       <input
                         type="number"
                         placeholder="Price"
@@ -1219,7 +1219,7 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
                           updatedTiers[index].price = parseInt(e.target.value) || 0;
                           setNewEvent({...newEvent, ticketTiers: updatedTiers});
                         }}
-                        className="input-field pl-8"
+                        className="input-field pl-10"
                         min="0"
                       />
                     </div>
