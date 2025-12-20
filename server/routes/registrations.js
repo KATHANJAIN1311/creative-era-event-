@@ -106,17 +106,25 @@ router.post('/', async (req, res) => {
         }
       });
 
+      // Convert data URL to buffer for attachment
+      const qrCodeBuffer = Buffer.from(qrCodeDataURL.split(',')[1], 'base64');
+
       const emailHtml = generateRegistrationConfirmationEmail(
         registrationData,
         eventDetails,
-        qrCodeDataURL
+        'cid:qrcode' // Use CID reference instead of data URL
       );
 
       const mailOptions = {
         from: `"Creative Era Events" <${process.env.EMAIL_USER}>`,
         to: sanitizedEmail,
         subject: `🎉 Registration Confirmed - Welcome to ${eventDetails?.name || 'Our Event'}!`,
-        html: emailHtml
+        html: emailHtml,
+        attachments: [{
+          filename: `qr-code-${registrationId}.png`,
+          content: qrCodeBuffer,
+          cid: 'qrcode' // Content-ID for inline embedding
+        }]
       };
 
       await transporter.sendMail(mailOptions);
