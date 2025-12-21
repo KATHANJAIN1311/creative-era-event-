@@ -28,7 +28,7 @@ const UserLayout = ({ children }) => {
                 <img 
                   src="https://creativeeraevents.com/assets/frontend-assets/images/1.site-logo.png"
                   alt="Company Logo" 
-                  className="w-10 h-8 sm:w-14 sm:h-10 rounded-xl bg-white p-1 border border-gray-200 shadow-sm"
+                  className="w-10 h-8 sm:w-14 sm:h-10 rounded-xl bg-black p-1 border border-gray-200 shadow-sm"
                 />
                 <span className="text-lg sm:text-2xl font-bold hero-text hidden sm:inline !text-white">Creative Era Events</span>
                 <span className="text-lg font-bold hero-text sm:hidden !text-white">Creative Era</span>
