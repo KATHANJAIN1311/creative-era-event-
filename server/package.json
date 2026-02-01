@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "create-admin": "node createAdmin.js"
+    "create-admin": "node createAdmin.js",
+    "migrate": "node run-migration.js",
+    "backup": "node run-migration.js --backup-only",
+    "test-connection": "node run-migration.js --test-only"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

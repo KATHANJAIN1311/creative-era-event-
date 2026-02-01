@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-02-01T07:52:23.778Z",
+  "collections": [
+    {
+      "name": "admins",
+      "count": 1
+    },
+    {
+      "name": "events",
+      "count": 13
+    },
+    {
+      "name": "registrations",
+      "count": 35
+    },
+    {
+      "name": "checkins",
+      "count": 3
+    },
+    {
+      "name": "consultations",
+      "count": 1
+    }
+  ],
+  "totalDocuments": 53
+}
