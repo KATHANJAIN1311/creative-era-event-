@@ -29,8 +29,7 @@ const io = socketIo(server, {
       "http://localhost:3005",
       'http://localhost:3000'
     ],
-    methods: ["GET", "POST"],
-    credentials: true
+    methods: ["GET", "POST"]
   }
 });
 
@@ -38,7 +37,6 @@ const io = socketIo(server, {
 app.use(cors({
   origin: [
     "https://creativeeraevents.in",
-    "https://www.creativeeraevents.in"
   ],
   credentials: true
 }));

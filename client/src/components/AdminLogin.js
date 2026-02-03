@@ -36,6 +36,10 @@ const AdminLogin = ({ onLogin }) => {
       
       if (response.status === 200) {
         localStorage.setItem('adminToken', data.token);
+        // Store CSRF token from login response if provided
+        if (data.csrfToken) {
+          localStorage.setItem('csrfToken', data.csrfToken);
+        }
         onLogin(data.admin);
         toast.success('Login successful!');
       } else {

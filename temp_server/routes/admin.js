@@ -59,11 +59,7 @@ router.post('/login', csrfProtection, validateLoginInput, async (req, res) => {
       { expiresIn: '24h' }
     );
     
-    res.json({ 
-      token, 
-      admin: { username: admin.username },
-      csrfToken: req.csrfToken()
-    });
+    res.json({ token, admin: { username: admin.username } });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Login failed' });
