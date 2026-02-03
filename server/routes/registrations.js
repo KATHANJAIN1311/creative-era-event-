@@ -173,8 +173,8 @@ router.get('/', async (req, res) => {
     const registrations = await Registration.find().sort({ createdAt: -1 });
     res.json(registrations);
   } catch (err) {
-    console.error('Error fetching registrations:', err);
-    res.status(400).json({ error: 'Error fetching registrations' });
+    console.error("REGISTRATION FETCH ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -183,8 +183,8 @@ router.get('/event/:eventId', async (req, res) => {
     const registrations = await Registration.find({ eventId: req.params.eventId }).sort({ createdAt: -1 });
     res.json(registrations);
   } catch (err) {
-    console.error('Error fetching event registrations:', err);
-    res.status(400).json({ error: 'Error fetching event registrations' });
+    console.error("REGISTRATION FETCH ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -193,8 +193,8 @@ router.get('/user/:email', async (req, res) => {
     const registrations = await Registration.find({ email: req.params.email }).sort({ createdAt: -1 });
     res.json(registrations);
   } catch (err) {
-    console.error('Error fetching user registrations:', err);
-    res.status(400).json({ error: 'Error fetching user registrations' });
+    console.error("REGISTRATION FETCH ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -204,8 +204,8 @@ router.get('/search', async (req, res) => {
     const registrations = await Registration.find({ email }).sort({ createdAt: -1 });
     res.json(registrations);
   } catch (err) {
-    console.error('Error searching registrations:', err);
-    res.status(400).json({ error: 'Error searching registrations' });
+    console.error("REGISTRATION FETCH ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -217,8 +217,8 @@ router.get('/:registrationId', async (req, res) => {
     }
     res.json(registration);
   } catch (err) {
-    console.error('Error fetching registration:', err);
-    res.status(400).json({ error: 'Error fetching registration' });
+    console.error("REGISTRATION FETCH ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 

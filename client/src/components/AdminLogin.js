@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, User } from 'lucide-react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 const AdminLogin = ({ onLogin }) => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
@@ -11,21 +12,29 @@ const AdminLogin = ({ onLogin }) => {
     setLoading(true);
     
     try {
-      // Ensure API_URL includes '/api' so requests hit server routes correctly
-      const rawApi = process.env.REACT_APP_API_URL || 'http://localhost:5001';
-      const API_URL = rawApi.endsWith('/api') ? rawApi : `${rawApi.replace(/\/$/, '')}/api`;
-      const response = await fetch(`${API_URL}/admin/login`, {
-      method: 'POST',
-      headers: { 
-    'Content-Type': 'application/json',
-    'X-CSRF-Token': 'admin-login'
-    },
-    body: JSON.stringify(credentials)
-    });
- 
-      const data = await response.json();
+      // Fetch CSRF token
+      const csrfRes = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/csrf-token`,
+        { withCredentials: true }
+      );
+      const csrfToken = csrfRes.data.csrfToken;
+      // persist CSRF token for other requests
+      localStorage.setItem('csrfToken', csrfToken);
       
-      if (response.ok) {
+      // Login with CSRF token
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/admin/login`,
+        credentials,
+        {
+          headers: {
+            "X-CSRF-Token": csrfToken
+          },
+          withCredentials: true
+        }
+      );
+      const data = response.data;
+      
+      if (response.status === 200) {
         localStorage.setItem('adminToken', data.token);
         onLogin(data.admin);
         toast.success('Login successful!');
@@ -35,7 +44,8 @@ const AdminLogin = ({ onLogin }) => {
       }
     } catch (error) {
       console.error('Login error:', error);
-      toast.error('Connection failed. Please check if server is running.');
+      const msg = error.response?.data?.message || error.message || 'Connection failed. Please check if server is running.';
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

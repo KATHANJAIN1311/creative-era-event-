@@ -4,6 +4,8 @@ const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
+const cookieParser = require('cookie-parser');
+const csurf = require('csurf');
 require('dotenv').config();
 
 const eventRoutes = require('./routes/events');
@@ -40,46 +42,17 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(cookieParser());
 
-// CSRF protection middleware
-const csrfProtection = (req, res, next) => {
-  // Only protect state-changing requests
-  if (['POST', 'PUT', 'DELETE'].includes(req.method)) {
-    const origin = req.get('Origin');
-    const referer = req.get('Referer');
-
-    const allowedOrigins = [
-      'https://creativeeraevents.in',
-      'https://www.creativeeraevents.in',
-      'https://api.creativeeraevents.in'
-    ];
-
-    // ✅ CASE 1: Same-origin request (Origin header missing)
-    if (!origin && referer) {
-      const refererOrigin = new URL(referer).origin;
-      if (!allowedOrigins.includes(refererOrigin)) {
-        return res.status(403).json({ message: 'CSRF: Invalid referer' });
-      }
-      return next();
-    }
-
-    // ✅ CASE 2: Cross-origin request
-    if (origin && !allowedOrigins.includes(origin)) {
-      return res.status(403).json({ message: 'CSRF: Invalid origin' });
-    }
-
-    // Require JSON only for APIs
-    if (req.path.startsWith('/api')) {
-      const contentType = req.get('Content-Type');
-      if (!contentType || !contentType.includes('application/json')) {
-        return res.status(403).json({ message: 'Invalid content type' });
-      }
-    }
+const csrfProtection = csurf({
+  cookie: {
+    httpOnly: true,
+    sameSite: "none",
+    secure: true
   }
+});
 
-  next();
-};
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Apply CSRF protection to all /api routes
 app.use('/api', csrfProtection);
@@ -103,6 +76,11 @@ app.use((req, res, next) => {
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// CSRF token endpoint
+app.get('/api/csrf-token', csrfProtection, (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
 });
 
 // Routes

@@ -15,16 +15,30 @@ const bookingRoutes = require('./server/routes/bookings');
 
 const app = express();
 const server = http.createServer(app);
+
+// Trust proxy (REQUIRED for Hostinger)
+app.set('trust proxy', 1);
+
 const io = socketIo(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3005",
+    origin: [
+      'https://creativeeraevents.in',
+      'https://www.creativeeraevents.in',
+      process.env.CLIENT_URL || "http://localhost:3005",
+      'http://localhost:3000'
+    ],
     methods: ["GET", "POST"]
   }
 });
 
-// Middleware
+// CORS Configuration (MUST come before CSRF)
 app.use(cors({
-  origin: [process.env.CLIENT_URL || 'http://localhost:3005', 'http://localhost:3000'],
+  origin: [
+    'https://creativeeraevents.in',
+    'https://www.creativeeraevents.in',
+    process.env.CLIENT_URL || 'http://localhost:3005',
+    'http://localhost:3000'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token']
@@ -53,7 +67,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Routes
+// Routes (Login route BEFORE CSRF protection)
 app.use('/api/events', eventRoutes);
 app.use('/api/registrations', registrationRoutes);
 app.use('/api/checkins', checkinRoutes);

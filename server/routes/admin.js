@@ -1,49 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const csurf = require('csurf');
 const Admin = require('../models/Admin');
 const Event = require('../models/Event');
 const Registration = require('../models/Registration');
 const Checkin = require('../models/Checkin');
 
-// CSRF protection middleware (Production-safe)
-const csrfProtection = (req, res, next) => {
-  // Only protect state-changing requests
-  if (['POST', 'PUT', 'DELETE'].includes(req.method)) {
-    const origin = req.get('Origin');
-    const referer = req.get('Referer');
-
-    const allowedOrigins = [
-      'https://creativeeraevents.in',
-      'https://www.creativeeraevents.in',
-      'https://api.creativeeraevents.in'
-    ];
-
-    // ✅ CASE 1: Same-origin request (Origin header missing)
-    if (!origin && referer) {
-      const refererOrigin = new URL(referer).origin;
-      if (!allowedOrigins.includes(refererOrigin)) {
-        return res.status(403).json({ message: 'CSRF: Invalid referer' });
-      }
-      return next();
-    }
-
-    // ✅ CASE 2: Cross-origin request
-    if (origin && !allowedOrigins.includes(origin)) {
-      return res.status(403).json({ message: 'CSRF: Invalid origin' });
-    }
-
-    // Require JSON only for APIs
-    if (req.path.startsWith('/api')) {
-      const contentType = req.get('Content-Type');
-      if (!contentType || !contentType.includes('application/json')) {
-        return res.status(403).json({ message: 'Invalid content type' });
-      }
-    }
+const csrfProtection = csurf({
+  cookie: {
+    httpOnly: true,
+    sameSite: "none",
+    secure: true
   }
-
-  next();
-};
+});
 const validateLoginInput = (req, res, next) => {
   const { username, password } = req.body;
   
@@ -59,8 +29,8 @@ const validateLoginInput = (req, res, next) => {
 };
 
 
-// Admin login (EXCLUDED from CSRF protection as per best practice)
-router.post('/login', validateLoginInput, async (req, res) => {
+// Admin login
+router.post('/login', csrfProtection, validateLoginInput, async (req, res) => {
   try {
     const { username, password } = req.body;
     
@@ -115,7 +85,7 @@ const authenticateAdmin = (req, res, next) => {
 
 
 // Get dashboard statistics
-router.get('/dashboard/:eventId', authenticateAdmin, async (req, res) => {
+router.get('/dashboard/:eventId', authenticateAdmin, csrfProtection, async (req, res) => {
   try {
     const { eventId } = req.params;
     
@@ -190,7 +160,7 @@ router.get('/dashboard/:eventId', authenticateAdmin, async (req, res) => {
 });
 
 // Export registrations data
-router.get('/export/registrations/:eventId', authenticateAdmin, async (req, res) => {
+router.get('/export/registrations/:eventId', authenticateAdmin, csrfProtection, async (req, res) => {
   try {
     const { eventId } = req.params;
     
@@ -221,7 +191,7 @@ router.get('/export/registrations/:eventId', authenticateAdmin, async (req, res)
 });
 
 // Export check-ins data
-router.get('/export/checkins/:eventId', authenticateAdmin, async (req, res) => {
+router.get('/export/checkins/:eventId', authenticateAdmin, csrfProtection, async (req, res) => {
   try {
     const { eventId } = req.params;
     

@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, MapPin, Clock, Users } from 'lucide-react';
 
+const BACKEND_URL = process.env.REACT_APP_API_URL.replace('/api', '');
+
 const EventCard = ({ event }) => {
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -17,7 +19,7 @@ const EventCard = ({ event }) => {
       <div className="relative">
         {event.imageUrl ? (
           <img
-            src={event.imageUrl.startsWith('http') ? event.imageUrl : `http://localhost:5001${event.imageUrl}`}
+            src={event.imageUrl.startsWith('http') ? event.imageUrl : `${BACKEND_URL}${event.imageUrl}`}
             alt={event.name}
             className="w-full h-40 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-500"
             onError={(e) => {

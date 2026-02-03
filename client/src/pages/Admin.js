@@ -72,7 +72,7 @@ const Admin = () => {
       toast.success('API connection successful!');
     } catch (error) {
       console.error('API connection failed:', error);
-      toast.error('API connection failed!');
+      toast.error(error.message || 'API connection failed!');
     }
   };
 
@@ -149,8 +149,12 @@ const Admin = () => {
 
   const fetchConsultations = async () => {
     try {
+      const rawApi = process.env.REACT_APP_API_URL;
+      const API_URL = rawApi.endsWith('/api') ? rawApi : `${rawApi.replace(/\/$/, '')}/api`;
       const filter = consultationFilter === 'all' ? '' : `?status=${consultationFilter}`;
-      const response = await fetch(`/api/consultations${filter}`);
+      const response = await fetch(`${API_URL}/consultations${filter}`, {
+        credentials: 'include'
+      });
       const data = await response.json();
       setConsultations(data);
     } catch (error) {
@@ -160,7 +164,11 @@ const Admin = () => {
 
   const fetchRegistrations = async () => {
   try {
-    const response = await fetch(`/api/registrations/event/${selectedEvent.eventId}`);
+    const rawApi = process.env.REACT_APP_API_URL;
+    const API_URL = rawApi.endsWith('/api') ? rawApi : `${rawApi.replace(/\/$/, '')}/api`;
+    const response = await fetch(`${API_URL}/registrations/event/${selectedEvent.eventId}`, {
+      credentials: 'include'
+    });
     const data = await response.json();
     setRegistrations(Array.isArray(data) ? data : []);
   } catch (error) {
@@ -172,12 +180,15 @@ const Admin = () => {
 
   const updateConsultationStatus = async (id, status) => {
     try {
-      await fetch(`/api/consultations/${id}/status`, {
+      const rawApi = process.env.REACT_APP_API_URL;
+      const API_URL = rawApi.endsWith('/api') ? rawApi : `${rawApi.replace(/\/$/, '')}/api`;
+      await fetch(`${API_URL}/consultations/${id}/status`, {
   method: 'PATCH',
+  credentials: 'include',
   headers: { 
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-    'X-CSRF-Token': 'admin-action'
+    'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
   },
   body: JSON.stringify({ status })
 });
@@ -185,7 +196,7 @@ const Admin = () => {
       toast.success('Status updated successfully');
       fetchConsultations();
     } catch (error) {
-      toast.error('Failed to update status');
+      toast.error(error.response?.data?.message || 'Failed to update status');
     }
   };
 
@@ -197,12 +208,15 @@ if (!registrationId || typeof registrationId !== 'string' || !/^[A-Z0-9]{8}$/.te
   return;
 }
 
-const response = await fetch(`/api/registrations/${registrationId}/status`, {
+const rawApi = process.env.REACT_APP_API_URL;
+const API_URL = rawApi.endsWith('/api') ? rawApi : `${rawApi.replace(/\/$/, '')}/api`;
+const response = await fetch(`${API_URL}/registrations/${registrationId}/status`, {
   method: 'PATCH',
+  credentials: 'include',
   headers: { 
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-    'X-CSRF-Token': 'admin-action'
+    'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
   },
   body: JSON.stringify({ status: 'checkedIn' })
 });    
@@ -213,10 +227,11 @@ const response = await fetch(`/api/registrations/${registrationId}/status`, {
           fetchRegistrations();
         }
       } else {
-        toast.error('Failed to check in user');
+        const err = await response.json().catch(() => null);
+        toast.error(err?.message || 'Failed to check in user');
       }
     } catch (error) {
-      toast.error('Error checking in user');
+      toast.error(error.response?.data?.message || error.message || 'Error checking in user');
     }
   };
 

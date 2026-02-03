@@ -20,7 +20,11 @@ const MyBooking = () => {
     setRegistrations([]);
 
     try {
-      const response = await fetch(`/api/registrations/search?email=${encodeURIComponent(email.trim())}`);
+      const rawApi = process.env.REACT_APP_API_URL;
+      const API_URL = rawApi.endsWith('/api') ? rawApi : `${rawApi.replace(/\/$/, '')}/api`;
+      const response = await fetch(`${API_URL}/registrations/search?email=${encodeURIComponent(email.trim())}`, {
+        credentials: 'include'
+      });
       
       if (response.ok) {
         const data = await response.json();

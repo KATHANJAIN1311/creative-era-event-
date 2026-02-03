@@ -1,12 +1,13 @@
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5001';
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
 
 class SocketService {
   socket = null;
 
   connect() {
-    this.socket = io(SOCKET_URL);
+  connect(options = {}) {
+    this.socket = io(SOCKET_URL, options);
     return this.socket;
   }
 

@@ -16,7 +16,7 @@ const Home = () => {
    // Connect to socket for real-time updates with CSRF protection
 const socket = socketService.connect({
   auth: {
-    'x-csrf-token': 'home-socket'
+    'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
   }
 });
 

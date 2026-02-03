@@ -32,7 +32,7 @@ const CheckIn = () => {
           : { registrationId: registrationId.trim() };
 
       const response = await fetch(
-        'http://localhost:5002/api/checkins/verify',
+        `${process.env.REACT_APP_API_URL}/checkins/verify`,
         {
           method: 'POST',
           headers: {
