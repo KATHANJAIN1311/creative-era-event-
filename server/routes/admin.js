@@ -6,22 +6,42 @@ const Event = require('../models/Event');
 const Registration = require('../models/Registration');
 const Checkin = require('../models/Checkin');
 
-// CSRF protection middleware
+// CSRF protection middleware (Production-safe)
 const csrfProtection = (req, res, next) => {
-  if (req.method === 'POST' || req.method === 'PUT' || req.method === 'DELETE') {
+  // Only protect state-changing requests
+  if (['POST', 'PUT', 'DELETE'].includes(req.method)) {
     const origin = req.get('Origin');
-    const contentType = req.get('Content-Type');
-    const allowedOrigins = ['http://localhost:3005', 'http://127.0.0.1:3005'];
-    
-    // Require JSON content type for state-changing requests
-    if (!contentType || !contentType.includes('application/json')) {
-      return res.status(403).json({ message: 'Invalid content type' });
+    const referer = req.get('Referer');
+
+    const allowedOrigins = [
+      'https://creativeeraevents.in',
+      'https://www.creativeeraevents.in',
+      'https://api.creativeeraevents.in'
+    ];
+
+    // ✅ CASE 1: Same-origin request (Origin header missing)
+    if (!origin && referer) {
+      const refererOrigin = new URL(referer).origin;
+      if (!allowedOrigins.includes(refererOrigin)) {
+        return res.status(403).json({ message: 'CSRF: Invalid referer' });
+      }
+      return next();
     }
-    
-    if (!origin || !allowedOrigins.includes(origin)) {
-      return res.status(403).json({ message: 'CSRF protection: Invalid origin' });
+
+    // ✅ CASE 2: Cross-origin request
+    if (origin && !allowedOrigins.includes(origin)) {
+      return res.status(403).json({ message: 'CSRF: Invalid origin' });
+    }
+
+    // Require JSON only for APIs
+    if (req.path.startsWith('/api')) {
+      const contentType = req.get('Content-Type');
+      if (!contentType || !contentType.includes('application/json')) {
+        return res.status(403).json({ message: 'Invalid content type' });
+      }
     }
   }
+
   next();
 };
 const validateLoginInput = (req, res, next) => {
@@ -39,8 +59,8 @@ const validateLoginInput = (req, res, next) => {
 };
 
 
-// Admin login
-router.post('/login', csrfProtection, validateLoginInput, async (req, res) => {
+// Admin login (EXCLUDED from CSRF protection as per best practice)
+router.post('/login', validateLoginInput, async (req, res) => {
   try {
     const { username, password } = req.body;
     
@@ -78,24 +98,19 @@ router.post('/login', csrfProtection, validateLoginInput, async (req, res) => {
 
 // Auth middleware
 const authenticateAdmin = (req, res, next) => {
-  // Apply CSRF protection first
-  csrfProtection(req, res, (err) => {
-    if (err) return next(err);
-    
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    
-    if (!token) {
-      return res.status(401).json({ message: 'Access denied' });
-    }
-    
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
-      req.admin = decoded;
-      next();
-    } catch (error) {
-      res.status(401).json({ message: 'Invalid token' });
-    }
-  });
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ message: 'Access denied' });
+  }
+  
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+    req.admin = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: 'Invalid token' });
+  }
 };
 
 

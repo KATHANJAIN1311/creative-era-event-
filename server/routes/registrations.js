@@ -10,11 +10,29 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    // CSRF Protection - Validate request origin
-    const origin = req.get('Origin') || req.get('Referer');
-    const allowedOrigins = [process.env.CLIENT_URL, 'http://localhost:3005', 'http://localhost:3000'];
-    
-    if (origin && !allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+    // CSRF Protection - Validate request origin (more robust)
+    const originHeader = req.get('Origin') || req.get('Referer') || '';
+    const allowedOrigins = [
+      process.env.CLIENT_URL,
+      'https://creativeeraevents.in',
+      'https://www.creativeeraevents.in',
+      'http://localhost:3005',
+      'http://127.0.0.1:3005',
+      'http://localhost:3000'
+    ].filter(Boolean);
+
+    const normalizedOrigin = originHeader.replace(/\/$/, '');
+
+    const isAllowed = allowedOrigins.some((allowed) => {
+      try {
+        const normAllowed = allowed.replace(/\/$/, '');
+        return (normalizedOrigin === normAllowed) || normalizedOrigin.startsWith(normAllowed);
+      } catch (e) {
+        return false;
+      }
+    });
+
+    if (normalizedOrigin && !isAllowed) {
       return res.status(403).json({ message: 'Forbidden: Invalid origin' });
     }
 
