@@ -34,14 +34,9 @@ const io = socketIo(server, {
 // CORS Configuration (MUST come before CSRF)
 app.use(cors({
   origin: [
-    'https://creativeeraevents.in',
-    'https://www.creativeeraevents.in',
-    process.env.CLIENT_URL || 'http://localhost:3005',
-    'http://localhost:3000'
+    "https://creativeeraevents.in",
   ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token']
+  credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
