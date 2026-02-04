@@ -12,44 +12,46 @@ const AdminLogin = ({ onLogin }) => {
     setLoading(true);
     
     try {
-      // Fetch CSRF token
-      const csrfRes = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/csrf-token`,
-        { withCredentials: true }
-      );
-      const csrfToken = csrfRes.data.csrfToken;
-      // persist CSRF token for other requests
-      localStorage.setItem('csrfToken', csrfToken);
+      // Ensure API_URL includes '/api' so requests hit server routes correctly
+      const rawApi = process.env.REACT_APP_API_URL;
+      const API_URL = rawApi.endsWith('/api') ? rawApi : `${rawApi}/api`;
       
-      // Login with CSRF token
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/admin/login`,
-        credentials,
-        {
-          headers: {
-            "X-CSRF-Token": csrfToken
-          },
-          withCredentials: true
-        }
-      );
-      const data = response.data;
+      const response = await fetch(`${API_URL}/admin/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: credentials.username,
+          password: credentials.password
+        })
+      });
+
+      // Check if response is OK
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Check if response is JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server did not return JSON");
+      }
+
+      const data = await response.json();
       
-      if (response.status === 200) {
+      // Handle success
+      if (data.success) {
         localStorage.setItem('adminToken', data.token);
-        // Store CSRF token from login response if provided
-        if (data.csrfToken) {
-          localStorage.setItem('csrfToken', data.csrfToken);
-        }
         onLogin(data.admin);
         toast.success('Login successful!');
       } else {
-        console.error('Login failed:', data);
-        toast.error(data.message || 'Invalid credentials');
+        toast.error(data.message || 'Login failed');
       }
+
     } catch (error) {
       console.error('Login error:', error);
-      const msg = error.response?.data?.message || error.message || 'Connection failed. Please check if server is running.';
-      toast.error(msg);
+      toast.error('Connection failed. Please check if server is running.');
     } finally {
       setLoading(false);
     }

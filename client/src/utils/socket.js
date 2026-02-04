@@ -5,7 +5,6 @@ const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
 class SocketService {
   socket = null;
 
-  connect() {
   connect(options = {}) {
     this.socket = io(SOCKET_URL, options);
     return this.socket;

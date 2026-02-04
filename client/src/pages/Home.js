@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { eventsAPI } from '../utils/api';
 import EventCard from '../components/EventCard';
 import socketService from '../utils/socket';
-import { Calendar, Users, QrCode, Monitor, ArrowRight, Building,Zap } from 'lucide-react';
+import { Calendar, Users, QrCode, Monitor } from 'lucide-react';
 
 const Home = () => {
   const [events, setEvents] = useState([]);
@@ -12,39 +12,36 @@ const Home = () => {
   useEffect(() => {
     fetchEvents();
     
-    // Connect to socket for real-time updates
-   // Connect to socket for real-time updates with CSRF protection
-const socket = socketService.connect({
-  auth: {
-    'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
-  }
-});
+    const socket = socketService.connect({
+      auth: {
+        'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
+      }
+    });
 
-socket.on('newRegistration', (data) => {
-  // Validate data structure to prevent XSS
-  if (data && typeof data.eventId === 'string' && typeof data.registrationCount === 'number') {
-    setEvents(prevEvents => 
-      prevEvents.map(event => 
-        event.eventId === data.eventId 
-          ? { ...event, registrationCount: data.registrationCount }
-          : event
-      )
-    );
-  }
-});
+    socket.on('newRegistration', (data) => {
+      if (data && typeof data.eventId === 'string' && typeof data.registrationCount === 'number') {
+        setEvents(prevEvents => 
+          prevEvents.map(event => 
+            event.eventId === data.eventId 
+              ? { ...event, registrationCount: data.registrationCount }
+              : event
+          )
+        );
+      }
+    });
 
-socket.on('newCheckin', (data) => {
-  // Validate data structure to prevent XSS
-  if (data && typeof data.eventId === 'string' && typeof data.checkedInCount === 'number') {
-    setEvents(prevEvents => 
-      prevEvents.map(event => 
-        event.eventId === data.eventId 
-          ? { ...event, checkedInCount: data.checkedInCount }
-          : event
-      )
-    );
-  }
-});
+    socket.on('newCheckin', (data) => {
+      if (data && typeof data.eventId === 'string' && typeof data.checkedInCount === 'number') {
+        setEvents(prevEvents => 
+          prevEvents.map(event => 
+            event.eventId === data.eventId 
+              ? { ...event, checkedInCount: data.checkedInCount }
+              : event
+          )
+        );
+      }
+    });
+
     return () => {
       socketService.disconnect();
     };
@@ -135,13 +132,13 @@ socket.on('newCheckin', (data) => {
             <div className="text-left">
               <h3 className="text-xl sm:text-2xl font-bold text-black mb-4">Our Mission</h3>
               <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                To revolutionize event management through innovative technology solutions that streamline registration, enhance attendee experience, and provide real-time insights. We are committed to delivering seamless, efficient, and secure event automation that empowers organizers to focus on creating memorable experiences.
+                To revolutionize event management through innovative technology solutions that streamline registration, enhance attendee experience, and provide real-time insights.
               </p>
             </div>
             <div className="text-left">
               <h3 className="text-xl sm:text-2xl font-bold text-black mb-4">Our Vision</h3>
               <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                To become the leading provider of smart event management solutions globally, setting new standards for digital event experiences. We envision a future where every event, regardless of size or complexity, benefits from our cutting-edge technology to create meaningful connections and lasting impressions.
+                To become the leading provider of smart event management solutions globally, setting new standards for digital event experiences.
               </p>
             </div>
           </div>
@@ -161,7 +158,7 @@ socket.on('newCheckin', (data) => {
                 QR-Powered Smart Entry
               </h2>
               <p className="text-black text-base sm:text-lg mb-6 sm:mb-8 leading-relaxed">
-                Say goodbye to manual registrations and long queues. Our advanced QR code system enables instant check-ins, real-time tracking, and seamless guest management. Perfect for events of any scale.
+                Say goodbye to manual registrations and long queues. Our advanced QR code system enables instant check-ins, real-time tracking, and seamless guest management.
               </p>
               
               <div className="space-y-3 sm:space-y-4">
@@ -201,7 +198,7 @@ socket.on('newCheckin', (data) => {
               <div className="bg-gray-50 rounded-2xl p-3 sm:p-4 border-2 border-gray-200">
                 <img
                   src="https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=800"
-                  alt="Man presenting to audience in professional setting"
+                  alt="Professional presentation at corporate event"
                   className="w-full h-48 sm:h-64 lg:h-80 object-cover rounded-xl"
                 />
               </div>
@@ -212,128 +209,43 @@ socket.on('newCheckin', (data) => {
                 Automated Kiosk Solutions
               </h2>
               <p className="text-black text-base sm:text-lg mb-6 sm:mb-8 leading-relaxed">
-                Our self-service kiosks revolutionize event registration. Attendees can check in, print badges, and access event information independently, reducing staff workload and enhancing guest experience.
+                Self-service registration kiosks for on-site attendees. Print instant QR tickets and maintain seamless event flow.
               </p>
-              
-              <div className="space-y-3 sm:space-y-4">
-                <div className="flex items-center space-x-3 sm:space-x-4">
-                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full flex-shrink-0"></div>
-                  <span className="text-sm sm:text-base text-black">Self-service registration & badge printing</span>
-                </div>
-                <div className="flex items-center space-x-3 sm:space-x-4">
-                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full flex-shrink-0"></div>
-                  <span className="text-sm sm:text-base text-black">Multi-language support</span>
-                </div>
-                <div className="flex items-center space-x-3 sm:space-x-4">
-                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full flex-shrink-0"></div>
-                  <span className="text-sm sm:text-base text-black">Custom branding & interface</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Creative Era Event Gallery */}
-      <div className="py-12 sm:py-16 lg:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-black text-center mb-8 sm:mb-12">
-          Creative Era Event Gallery
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200">
-            <img
-              src="https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800"
-              alt="Networking Event"
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Networking Events</h3>
-              <p className="text-gray-600">Structured networking sessions with digital connection facilitation</p>
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200">
-            <img
-              src="https://creativeeraevents.com/assets/admin-assets/images/gallery/1690535698.JPG"
-              alt="Creative Era Event"
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Creative Era Event</h3>
-              <p className="text-gray-600">Professional event management with creative solutions</p>
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200">
-            <img
-              src="https://creativeeraevents.com/assets/admin-assets/images/gallery/1690535648.JPG"
-              alt="Corporate Gathering"
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Corporate Gathering</h3>
-              <p className="text-gray-600">Exclusive corporate events with premium service delivery</p>
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200">
-            <img
-              src="https://creativeeraevents.com/assets/admin-assets/images/gallery/1690535735.JPG"
-              alt="Special Event"
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Special Event</h3>
-              <p className="text-gray-600">Memorable special events with attention to detail</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Services Section */}
-      <div className="py-12 sm:py-16 lg:py-20 relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-black mb-4 sm:mb-6">
-            Premium Event Solutions
-          </h2>
-          <p className="text-base sm:text-lg lg:text-xl text-black max-w-3xl mx-auto">
-            From corporate conferences to exclusive gatherings, we deliver seamless experiences
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          <div className="card-premium rounded-2xl p-6 sm:p-8 text-center animate-fade-in">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 gold-gradient rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-black" />
-            </div>
-            <h3 className="text-xl sm:text-2xl font-bold text-navy-900 mb-3 sm:mb-4">
-              Event Registration
-            </h3>
-            <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-              Seamless online registration with automated QR generation and instant WhatsApp confirmations
+      {/* Events Section */}
+      <div className="bg-white py-12 sm:py-16 lg:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black mb-4 sm:mb-6">
+              Upcoming Events
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-600">
+              Join our exciting events and experience seamless registration
             </p>
           </div>
-
-          <div className="card-premium rounded-2xl p-8 text-center animate-fade-in">
-            <div className="w-16 h-16 gold-gradient rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <QrCode className="w-8 h-8 text-black" />
+          
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="mt-4 text-gray-600">Loading events...</p>
             </div>
-            <h3 className="text-2xl font-bold text-navy-900 mb-4">
-              Smart Check-in
-            </h3>
-            <p className="text-gray-700 leading-relaxed">
-              Lightning-fast QR code verification with real-time analytics and contactless entry
-            </p>
-          </div>
-
-          <div className="card-premium rounded-2xl p-8 text-center animate-fade-in">
-            <div className="w-16 h-16 gold-gradient rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Zap className="w-8 h-8 text-black" />
+          ) : events.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {events.map((event) => (
+                <EventCard key={event.eventId} event={event} />
+              ))}
             </div>
-            <h3 className="text-2xl font-bold text-navy-900 mb-4">
-              Live Analytics
-            </h3>
-            <p className="text-gray-700 leading-relaxed">
-              Real-time dashboards with attendance tracking, engagement metrics, and detailed reports
-            </p>
-          </div>
+          ) : (
+            <div className="text-center py-12">
+              <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-xl text-gray-600 mb-2">No events available</p>
+              <p className="text-gray-500">Check back soon for upcoming events!</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
