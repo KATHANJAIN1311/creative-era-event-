@@ -12,11 +12,32 @@ const AdminLogin = ({ onLogin }) => {
     setLoading(true);
 
     try {
-      const response = await adminAPI.login(credentials.username, credentials.password);
-      const data = response.data;
+      const API_URL = process.env.NODE_ENV === 'production' 
+        ? 'https://api.creativeeeraevents.in/api'
+        : 'http://localhost:3001/api';
+        
+      const response = await fetch(`${API_URL}/admin/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials)
+      });
+
+      // Check content-type before parsing
+      const contentType = response.headers.get('content-type');
       
-      console.log('Login successful:', data);
-      
+      if (!contentType || !contentType.includes('application/json')) {
+        // Server returned non-JSON (likely HTML error page)
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        toast.error('Server error: Invalid response format');
+        return;
+      }
+
+      // Now safe to parse JSON
+      const data = await response.json();
+
       if (data.success) {
         localStorage.setItem('adminToken', data.token);
         onLogin(data.user);
@@ -24,11 +45,10 @@ const AdminLogin = ({ onLogin }) => {
       } else {
         toast.error(data.message || 'Login failed');
       }
-
+      
     } catch (error) {
       console.error('Login error:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Login failed';
-      toast.error(errorMessage);
+      toast.error('Failed to connect to server');
     } finally {
       setLoading(false);
     }
