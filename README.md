@@ -1,148 +1,174 @@
-# Event Registration & Entry Automation System
+# Event Registration System - Backend Server
 
-A comprehensive digital platform designed to streamline and automate the registration, onboarding, verification, and attendee check-in process for Creative Era Events.
+A comprehensive Node.js backend API for the Event Registration & Entry Automation System, designed to handle event management, user registrations, QR code generation, and real-time check-ins.
 
 ## 🚀 Features
 
-### Core Functionality
-- **Online Registration**: Web-based registration with automated QR code generation
-- **Kiosk Registration**: On-site registration with instant QR slip printing
-- **QR Verification**: Quick check-in using QR code scanning
-- **Real-time Updates**: Live data synchronization using WebSockets
-- **Admin Dashboard**: Comprehensive analytics and event management
-- **WhatsApp Integration**: Automated QR code delivery via WhatsApp
+### Core API Functionality
+- **Event Management**: CRUD operations for events with image upload support
+- **User Registration**: Secure registration with QR code generation
+- **QR Code Verification**: Real-time check-in system with QR scanning
+- **Email Notifications**: Professional confirmation emails with QR codes
+- **Real-time Updates**: WebSocket integration for live data synchronization
+- **Admin Authentication**: JWT-based admin authentication system
+- **File Upload**: Multer integration for event image uploads
 
-### System Components
-1. **Web-Based Registration Module**
-2. **QR Code Generation & Storage**
-3. **WhatsApp Automation Workflow**
-4. **Kiosk Registration Interface**
-5. **QR Code Slip Printing**
-6. **QR Verification & Check-In Module**
-7. **Admin Dashboard with Analytics**
+### Security Features
+- CORS configuration for cross-origin requests
+- Input validation and sanitization
+- JWT token authentication
+- Password hashing with bcrypt
+- Request origin validation
+- Rate limiting ready
 
 ## 🛠️ Technology Stack
 
-### Frontend
-- **React.js** - User interface framework
-- **Tailwind CSS** - Styling and responsive design
-- **React Router** - Client-side routing
-- **Socket.io Client** - Real-time communication
-- **Chart.js** - Data visualization
-- **React Hot Toast** - Notifications
-
-### Backend
-- **Node.js** - Runtime environment
-- **Express.js** - Web framework
-- **MongoDB** - Database
-- **Socket.io** - Real-time communication
-- **Twilio** - WhatsApp integration
-- **QRCode.js** - QR code generation
+- **Runtime**: Node.js 18.x
+- **Framework**: Express.js
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT (JSON Web Tokens)
+- **File Upload**: Multer
+- **Email**: Nodemailer (Gmail integration)
+- **QR Codes**: QRCode.js
+- **Real-time**: Socket.io
+- **Process Management**: PM2
 
 ## 📋 Prerequisites
 
-Before running this application, make sure you have the following installed:
-- Node.js (v14 or higher)
+- Node.js (v18 or higher)
 - MongoDB (v4.4 or higher)
+- Gmail account for email notifications
 - npm or yarn package manager
 
 ## 🔧 Installation & Setup
 
 ### 1. Clone the Repository
 ```bash
-git clone <repository-url>
-cd event-registration-system
+git clone https://github.com/KATHANJAIN1311/server.git
+cd server
 ```
 
 ### 2. Install Dependencies
 ```bash
-# Install root dependencies
 npm install
-
-# Install all dependencies (client + server)
-npm run install-all
 ```
 
 ### 3. Environment Configuration
 
-Create a `.env` file in the `server` directory with the following variables:
+Create a `.env` file in the root directory:
 
 ```env
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/event-registration
+# Server Configuration
+PORT=3001
+NODE_ENV=production
+
+# MongoDB Configuration
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database?retryWrites=true&w=majority
+
+# JWT Secret (Generate a secure random string)
 JWT_SECRET=your_jwt_secret_key_here
-TWILIO_ACCOUNT_SID=your_twilio_account_sid
-TWILIO_AUTH_TOKEN=your_twilio_auth_token
-TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
+
+# Client URL (Frontend)
+CLIENT_URL=https://yourdomain.com
+
+# Admin Credentials
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your_secure_password
+
+# Email Configuration (Gmail)
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_app_password
 ```
 
-### 4. Database Setup
-
-Make sure MongoDB is running on your system:
+### 4. Create Admin User
 ```bash
-# Start MongoDB service
-mongod
+npm run create-admin
 ```
 
-The application will automatically create the required collections on first run.
+### 5. Start the Server
 
-### 5. Twilio WhatsApp Setup (Optional)
-
-1. Create a Twilio account at https://www.twilio.com/
-2. Set up WhatsApp Sandbox or get approved for WhatsApp Business API
-3. Add your Twilio credentials to the `.env` file
-
-## 🚀 Running the Application
-
-### Development Mode
+#### Development Mode
 ```bash
-# Run both client and server concurrently
 npm run dev
 ```
 
-This will start:
-- Backend server on `http://localhost:5000`
-- Frontend client on `http://localhost:3000`
-
-### Production Mode
+#### Production Mode
 ```bash
-# Build the client
-npm run build
-
-# Start the server
 npm start
 ```
 
-## 📱 Usage Guide
+#### PM2 Production Deployment
+```bash
+npm run pm2:prod
+```
 
-### 1. Event Creation
-- Navigate to `/admin` to access the admin dashboard
-- Click "Create Event" to add a new event
-- Fill in event details (name, date, time, venue, description)
+## 📁 Project Structure
 
-### 2. Online Registration
-- Users can browse events on the homepage
-- Click "Register" on any event card
-- Fill in registration details (name, email, phone)
-- QR code is automatically generated and sent via WhatsApp
+```
+server/
+├── models/
+│   ├── Admin.js          # Admin user schema
+│   ├── Event.js          # Event schema
+│   ├── Registration.js   # Registration schema
+│   ├── Checkin.js        # Check-in schema
+│   └── Consultation.js   # Consultation schema
+├── routes/
+│   ├── admin.js          # Admin authentication routes
+│   ├── events.js         # Event CRUD routes
+│   ├── registrations.js  # Registration routes
+│   ├── checkins.js       # Check-in verification routes
+│   ├── consultations.js  # Consultation routes
+│   └── bookings.js       # Booking validation routes
+├── middleware/
+│   └── auth.js           # JWT authentication middleware
+├── utils/
+│   └── emailTemplate.js  # Email template generator
+├── uploads/              # File upload directory
+├── index.js              # Main server file
+├── package.json          # Dependencies and scripts
+├── ecosystem.config.js   # PM2 configuration
+├── createAdmin.js        # Admin creation script
+└── .env.example          # Environment variables template
+```
 
-### 3. Kiosk Registration
-- Access kiosk mode at `/kiosk`
-- Large, touch-friendly interface for on-site registration
-- Instant QR slip generation with print functionality
+## 🔌 API Endpoints
 
-### 4. QR Code Verification
-- Staff can use `/scanner` for check-in verification
-- Supports manual QR data input or image upload
-- Real-time validation and check-in confirmation
+### Health Check
+- `GET /` - Server status
+- `GET /api` - API status
+- `GET /api/health` - Health check with database status
 
-### 5. Admin Dashboard
-- View real-time statistics and analytics
-- Monitor registrations and check-ins
-- Export data in CSV format
-- Hourly check-in charts and registration type breakdown
+### Authentication
+- `POST /api/admin/login` - Admin login
 
-## 🏗️ Database Schema
+### Events
+- `GET /api/events` - Get all active events
+- `GET /api/events/:id` - Get event by ID
+- `POST /api/events` - Create new event (with image upload)
+- `PUT /api/events/:id` - Update event
+- `DELETE /api/events/:id` - Soft delete event
+
+### Registrations
+- `POST /api/registrations` - Create registration
+- `GET /api/registrations` - Get all registrations
+- `GET /api/registrations/event/:eventId` - Get registrations for event
+- `GET /api/registrations/user/:email` - Get user registrations
+- `GET /api/registrations/search?email=` - Search registrations
+- `GET /api/registrations/:registrationId` - Get registration by ID
+
+### Check-ins
+- `POST /api/checkins/verify` - Verify QR and check-in
+
+### Consultations
+- `POST /api/consultations` - Create consultation request
+- `GET /api/consultations` - Get all consultations
+- `PATCH /api/consultations/:id/status` - Update consultation status
+- `GET /api/consultations/search?email=` - Search consultations
+
+### Bookings
+- `POST /api/bookings` - Validate booking
+
+## 📊 Database Schema
 
 ### Events Collection
 ```javascript
@@ -155,7 +181,12 @@ npm start
   description: String,
   imageUrl: String,
   isActive: Boolean,
-  maxCapacity: Number
+  maxCapacity: Number,
+  ticketTiers: [{
+    name: String,
+    price: Number,
+    seats: Number
+  }]
 }
 ```
 
@@ -163,14 +194,20 @@ npm start
 ```javascript
 {
   registrationId: String (unique),
-  eventId: String (foreign key),
+  eventId: String,
   name: String,
   email: String,
   phone: String,
-  qrCode: String,
-  registrationType: String (online/kiosk),
+  company: String,
+  ticketTier: String,
+  numberOfTickets: Number,
+  totalAmount: Number,
+  status: String,
   isCheckedIn: Boolean,
-  whatsappSent: Boolean
+  checkedInAt: Date,
+  qrCode: String,
+  paymentId: String,
+  paymentStatus: String
 }
 ```
 
@@ -178,119 +215,101 @@ npm start
 ```javascript
 {
   checkinId: String (unique),
-  registrationId: String (foreign key),
-  eventId: String (foreign key),
+  registrationId: String,
+  eventId: String,
   checkinTime: Date,
   checkedInBy: String
 }
 ```
 
-## 🔌 API Endpoints
-
-### Events
-- `GET /api/events` - Get all events
-- `GET /api/events/:id` - Get event by ID
-- `POST /api/events` - Create new event
-- `PUT /api/events/:id` - Update event
-- `DELETE /api/events/:id` - Delete event
-
-### Registrations
-- `POST /api/registrations` - Create registration
-- `GET /api/registrations/:id` - Get registration by ID
-- `GET /api/registrations/event/:eventId` - Get registrations for event
-
-### Check-ins
-- `POST /api/checkins/verify` - Verify QR and check-in
-- `GET /api/checkins/event/:eventId` - Get check-ins for event
-
-### Admin
-- `GET /api/admin/dashboard/:eventId` - Get dashboard data
-- `GET /api/admin/export/registrations/:eventId` - Export registrations
-- `GET /api/admin/export/checkins/:eventId` - Export check-ins
-
-## 🎨 UI/UX Features
-
-### Responsive Design
-- Mobile-first approach with Tailwind CSS
-- Optimized for tablets and desktop screens
-- Touch-friendly kiosk interface
-
-### Real-time Updates
-- Live registration counters
-- Instant check-in notifications
-- WebSocket-based communication
-
-### Accessibility
-- Semantic HTML structure
-- Keyboard navigation support
-- Screen reader compatible
-- High contrast color scheme
-
 ## 🔒 Security Features
 
-- Input validation and sanitization
-- QR code encryption
-- Rate limiting for API endpoints
-- CORS configuration
-- Environment variable protection
+- **CORS Configuration**: Properly configured for production domains
+- **Input Sanitization**: XSS prevention on all inputs
+- **JWT Authentication**: Secure token-based authentication
+- **Password Hashing**: bcrypt for secure password storage
+- **Origin Validation**: Request origin verification
+- **File Upload Security**: Restricted file types and sizes
 
-## 📊 Analytics & Reporting
+## 📧 Email Integration
 
-### Dashboard Metrics
-- Total registrations
-- Check-in statistics
-- Attendance rates
-- Registration type breakdown
-- Hourly check-in patterns
+The system sends professional confirmation emails with:
+- Registration details
+- Event information
+- QR code attachment
+- Company branding
+- Contact information
 
-### Export Capabilities
-- CSV export for registrations
-- Check-in data export
-- Custom date range filtering
-- Bulk data operations
+## 🔄 Real-time Features
+
+WebSocket integration provides:
+- Live registration updates
+- Real-time check-in notifications
+- Dashboard data synchronization
 
 ## 🚀 Deployment
 
-### Local Deployment
-The application is ready to run locally with the setup instructions above.
+### Local Development
+```bash
+npm run dev
+```
 
-### Cloud Deployment Options
+### Production with PM2
+```bash
+npm run pm2:prod
+npm run pm2:logs    # View logs
+npm run pm2:status  # Check status
+```
 
-#### AWS Deployment
-1. **EC2 Instance**: Deploy on Amazon EC2
-2. **MongoDB Atlas**: Use managed MongoDB service
-3. **S3**: Store event images and QR codes
-4. **CloudFront**: CDN for static assets
+### Environment Variables for Production
+Update `ecosystem.config.js` with production values:
+- MongoDB connection string
+- JWT secret
+- Email credentials
+- Client URL
 
-#### Google Cloud Deployment
-1. **Compute Engine**: Deploy on GCP VM
-2. **Cloud MongoDB**: Use Google Cloud MongoDB
-3. **Cloud Storage**: Store media files
-4. **Cloud CDN**: Content delivery
+## 📝 API Response Format
 
-#### Heroku Deployment
-1. Create Heroku app
-2. Add MongoDB Atlas add-on
-3. Configure environment variables
-4. Deploy using Git
+### Success Response
+```javascript
+{
+  success: true,
+  data: {...},
+  message: "Operation successful"
+}
+```
+
+### Error Response
+```javascript
+{
+  success: false,
+  message: "Error description",
+  error: "Detailed error (development only)"
+}
+```
 
 ## 🧪 Testing
 
-### Manual Testing Checklist
-- [ ] Event creation and management
-- [ ] Online registration flow
-- [ ] Kiosk registration process
-- [ ] QR code generation and scanning
-- [ ] WhatsApp message delivery
-- [ ] Real-time updates
-- [ ] Data export functionality
-- [ ] Mobile responsiveness
+### Manual Testing
+- Use Postman or similar tools
+- Test all endpoints with various inputs
+- Verify CORS functionality
+- Test file upload functionality
 
-### Automated Testing (Future Enhancement)
-- Unit tests for API endpoints
-- Integration tests for workflows
-- E2E tests for user journeys
-- Performance testing for concurrent users
+### Health Check
+```bash
+curl http://localhost:3001/api/health
+```
+
+## 📊 Monitoring
+
+### PM2 Commands
+```bash
+pm2 status                    # Check process status
+pm2 logs creativeeraevents-api # View logs
+pm2 restart creativeeraevents-api # Restart process
+pm2 stop creativeeraevents-api    # Stop process
+```
 
 ## 🤝 Contributing
 
@@ -302,36 +321,14 @@ The application is ready to run locally with the setup instructions above.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License.
 
 ## 📞 Support
 
 For support and questions:
 - Create an issue in the repository
-- Contact the development team
-- Check the documentation
-
-## 🔄 Version History
-
-### v1.0.0 (Current)
-- Initial release
-- Core functionality implemented
-- Basic admin dashboard
-- WhatsApp integration
-- Responsive design
-
-### Future Enhancements
-- Email notifications
-- SMS integration
-- Advanced analytics
-- Multi-language support
-- Mobile app
-- Payment integration
-- Social media sharing
-- Advanced reporting
-- API rate limiting
-- User authentication
-- Role-based access control
+- Contact: creativeeraevents@gmail.com
+- Phone: +91 90981 76171
 
 ---
 
