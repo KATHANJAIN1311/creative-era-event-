@@ -28,10 +28,11 @@ const MyBooking = () => {
       
       if (response.ok) {
         const data = await response.json();
-        setRegistrations(data);
+        const registrationsData = Array.isArray(data) ? data : [];
+        setRegistrations(registrationsData);
         setError('');
         
-        if (data.length === 0) {
+        if (registrationsData.length === 0) {
           setError('No registrations found for this email address');
         }
       } else {
@@ -136,7 +137,7 @@ const MyBooking = () => {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold text-black">Your Registrations ({registrations.length})</h2>
               <div className="text-sm text-black">
-                Found {registrations.filter(r => r.isCheckedIn).length} checked-in, {registrations.filter(r => !r.isCheckedIn).length} pending
+                Found {Array.isArray(registrations) ? registrations.filter(r => r.isCheckedIn).length : 0} checked-in, {Array.isArray(registrations) ? registrations.filter(r => !r.isCheckedIn).length : 0} pending
               </div>
             </div>
             {registrations.map((registration) => (

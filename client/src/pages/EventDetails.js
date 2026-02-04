@@ -227,7 +227,7 @@ const EventDetails = () => {
             </div>
 
             {/* Ticket Tiers */}
-            {isUpcoming && event.ticketTiers && event.ticketTiers.length > 0 && (
+            {isUpcoming && Array.isArray(event.ticketTiers) && event.ticketTiers.length > 0 && (
               <div className="mb-12">
                 <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Choose Your Experience</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -299,12 +299,12 @@ const EventDetails = () => {
                   to={`/events/${event.eventId}/register`}
                   state={{ selectedTier }}
                   className={`px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 text-center ${
-                    selectedTier || !event.ticketTiers?.length
+                    selectedTier || !Array.isArray(event.ticketTiers) || event.ticketTiers.length === 0
                       ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xl hover:shadow-2xl' 
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                   onClick={(e) => {
-                    if (!selectedTier && event.ticketTiers && event.ticketTiers.length > 0) {
+                    if (!selectedTier && Array.isArray(event.ticketTiers) && event.ticketTiers.length > 0) {
                       e.preventDefault();
                       alert('Please select a ticket tier first');
                     }

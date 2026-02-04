@@ -23,12 +23,14 @@ const Kiosk = () => {
   const fetchEvents = async () => {
     try {
       const response = await eventsAPI.getAll();
-      setEvents(response.data);
-      if (response.data.length > 0) {
-        setSelectedEvent(response.data[0]);
+      const eventsData = Array.isArray(response.data) ? response.data : [];
+      setEvents(eventsData);
+      if (eventsData.length > 0) {
+        setSelectedEvent(eventsData[0]);
       }
     } catch (error) {
       console.error('Error fetching events:', error);
+      setEvents([]);
     } finally {
       setLoading(false);
     }

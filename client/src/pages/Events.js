@@ -23,16 +23,19 @@ const Events = () => {
   const fetchEvents = async () => {
     try {
       const response = await eventsAPI.getAll();
-      setEvents(response.data);
+      const eventsData = Array.isArray(response.data) ? response.data : [];
+      setEvents(eventsData);
     } catch (error) {
       console.error('Error fetching events:', error);
+      setEvents([]);
     } finally {
       setLoading(false);
     }
   };
 
   const filterAndSortEvents = () => {
-    let filtered = events.filter(event => {
+    const eventsArray = Array.isArray(events) ? events : [];
+    let filtered = eventsArray.filter(event => {
       // Search filter
       const matchesSearch = event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -62,7 +65,9 @@ const Events = () => {
     setFilteredEvents(filtered);
   };
 
-  const upcomingEvents = filteredEvents.filter(event => new Date(event.date) >= new Date());
+  const upcomingEvents = Array.isArray(filteredEvents) 
+    ? filteredEvents.filter(event => new Date(event.date) >= new Date())
+    : [];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">

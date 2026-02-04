@@ -20,25 +20,27 @@ const Home = () => {
 
     socket.on('newRegistration', (data) => {
       if (data && typeof data.eventId === 'string' && typeof data.registrationCount === 'number') {
-        setEvents(prevEvents => 
-          prevEvents.map(event => 
+        setEvents(prevEvents => {
+          const eventsArray = Array.isArray(prevEvents) ? prevEvents : [];
+          return eventsArray.map(event => 
             event.eventId === data.eventId 
               ? { ...event, registrationCount: data.registrationCount }
               : event
-          )
-        );
+          );
+        });
       }
     });
 
     socket.on('newCheckin', (data) => {
       if (data && typeof data.eventId === 'string' && typeof data.checkedInCount === 'number') {
-        setEvents(prevEvents => 
-          prevEvents.map(event => 
+        setEvents(prevEvents => {
+          const eventsArray = Array.isArray(prevEvents) ? prevEvents : [];
+          return eventsArray.map(event => 
             event.eventId === data.eventId 
               ? { ...event, checkedInCount: data.checkedInCount }
               : event
-          )
-        );
+          );
+        });
       }
     });
 
@@ -50,8 +52,9 @@ const Home = () => {
   const fetchEvents = async () => {
     try {
       const response = await eventsAPI.getAll();
+      const responseData = Array.isArray(response.data) ? response.data : [];
       const eventsWithStats = await Promise.all(
-        response.data.map(async (event) => {
+        responseData.map(async (event) => {
           const eventDetails = await eventsAPI.getById(event.eventId);
           return eventDetails.data;
         })
@@ -59,6 +62,7 @@ const Home = () => {
       setEvents(eventsWithStats);
     } catch (error) {
       console.error('Error fetching events:', error);
+      setEvents([]);
     } finally {
       setLoading(false);
     }
