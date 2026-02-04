@@ -38,8 +38,32 @@ api.interceptors.response.use(
 );
 
 // Events API
+export const fetchEvents = async () => {
+  try {
+    const response = await fetch('https://api.creativeeeraevents.in/api/events', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      credentials: 'include',
+      mode: 'cors'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    throw error;
+  }
+};
+
 export const eventsAPI = {
-  getAll: () => api.get('/events'),
+  getAll: () => fetchEvents(),
   getById: (id) => {
     if (!id || typeof id !== 'string') {
       throw new Error('Invalid event ID format');
@@ -56,14 +80,12 @@ export const eventsAPI = {
     }
     return api.put(`/events/${id}`, data);
   },
-
   delete: (id) => {
     if (!id || typeof id !== 'string') {
       throw new Error('Invalid event ID format');
     }
     return api.delete(`/events/${id}`);
   },
-
 };
 
 // Registrations API
