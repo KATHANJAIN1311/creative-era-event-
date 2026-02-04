@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, User } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { adminAPI } from '../utils/api';
 
 const AdminLogin = ({ onLogin }) => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
@@ -11,33 +12,11 @@ const AdminLogin = ({ onLogin }) => {
     setLoading(true);
 
     try {
-      const rawApi = process.env.REACT_APP_API_URL;
-      if (!rawApi) {
-        throw new Error('REACT_APP_API_URL is not defined');
-      }
-
-      const API_URL = rawApi.endsWith('/api') ? rawApi : `${rawApi}/api`;
-
-      const response = await fetch(`${API_URL}/admin/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(credentials)
-      });
-
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(`HTTP ${response.status}: ${text}`);
-      }
-
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Server did not return JSON');
-      }
-
-      const data = await response.json();
-
+      const response = await adminAPI.login(credentials.username, credentials.password);
+      const data = response.data;
+      
+      console.log('Login successful:', data);
+      
       if (data.success) {
         localStorage.setItem('adminToken', data.token);
         onLogin(data.user);
@@ -48,7 +27,8 @@ const AdminLogin = ({ onLogin }) => {
 
     } catch (error) {
       console.error('Login error:', error);
-      toast.error(error.message || 'Unable to connect to server');
+      const errorMessage = error.response?.data?.message || error.message || 'Login failed';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

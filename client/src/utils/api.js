@@ -1,12 +1,13 @@
 import axios from 'axios';
 
-// Normalize the API base URL: ensure it ends with '/api'
-const rawApiUrl = process.env.REACT_APP_API_URL || '';
-const API_BASE_URL = rawApiUrl.endsWith('/api') ? rawApiUrl : `${rawApiUrl.replace(/\/$/, '')}/api`;
+// Base API configuration
+const API_URL = 'https://api.creativeeeraevents.in/api';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  }
 });
 
 
@@ -92,6 +93,7 @@ export const checkinsAPI = {
 
 // Admin API
 export const adminAPI = {
+  login: (username, password) => api.post('/admin/login', { username, password }),
   getDashboard: (eventId) => {
     if (!eventId || typeof eventId !== 'string') {
       throw new Error('Invalid event ID format');
