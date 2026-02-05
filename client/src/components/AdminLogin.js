@@ -8,55 +8,30 @@ const AdminLogin = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (e) => {
-  e.preventDefault();
-  
-  try {
-    console.log('Attempting login with:', credentials);
+    e.preventDefault();
+    setLoading(true);
     
-    const response = await fetch('https://api.creativeeraevents.in/api/admin/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials)
-    });
-
-    console.log('Response status:', response.status);
-    
-    // Get response as text first
-    const responseText = await response.text();
-    console.log('Raw response:', responseText);
-    
-    // Check if it looks like JavaScript code (your current problem)
-    if (responseText.includes('require(') || responseText.includes('const express')) {
-      toast.error('Server configuration error: Backend is not running properly');
-      console.error('Server returned source code instead of executing it!');
-      return;
-    }
-    
-    // Try to parse as JSON
-    let data;
     try {
-      data = JSON.parse(responseText);
-    } catch (parseError) {
-      toast.error('Server returned invalid response');
-      console.error('Parse error:', parseError);
-      return;
-    }
+      console.log('Attempting login with:', credentials);
+      
+      const response = await adminAPI.login(credentials.username, credentials.password);
+      console.log('Response data:', response.data);
 
-    if (data.success) {
-      localStorage.setItem('adminToken', data.token);
-      onLogin(data.user);
-      toast.success('Login successful!');
-    } else {
-      toast.error(data.message || 'Invalid credentials');
+      if (response.data.success) {
+        localStorage.setItem('adminToken', response.data.token);
+        onLogin(response.data.user);
+        toast.success('Login successful!');
+      } else {
+        toast.error(response.data.message || 'Invalid credentials');
+      }
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error(error.response?.data?.message || 'Cannot connect to server');
+    } finally {
+      setLoading(false);
     }
-    
-  } catch (error) {
-    console.error('Login error:', error);
-    toast.error('Cannot connect to server');
-  }
-};
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -108,9 +83,10 @@ const AdminLogin = ({ onLogin }) => {
 
           <button
             type="submit"
+            disabled={loading}
             className="w-full btn-primary"
           >
-            Sign in
+            {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
       </div>
