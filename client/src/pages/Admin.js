@@ -272,30 +272,136 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
+        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-          >
+          <button onClick={handleLogout} className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
             Logout
           </button>
         </div>
         
         {loading ? (
-          <div className="text-center">
+          <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             <p className="mt-4 text-gray-600">Loading...</p>
           </div>
         ) : (
-          <div>
-            <p className="text-gray-600">Admin dashboard content goes here...</p>
-            {selectedEvent && (
-              <div className="mt-4">
-                <h2 className="text-xl font-semibold">Selected Event: {selectedEvent.name}</h2>
+          <>
+            {/* Event Selector */}
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Select Event</h2>
+                <button onClick={() => setShowCreateForm(!showCreateForm)} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                  {showCreateForm ? 'Cancel' : 'Create New Event'}
+                </button>
               </div>
+              
+              {showCreateForm && (
+                <form onSubmit={handleCreateEvent} className="mb-6 p-4 bg-gray-50 rounded-lg">
+                  <div className="grid grid-cols-2 gap-4">
+                    <input type="text" placeholder="Event Name" value={newEvent.name} onChange={(e) => setNewEvent({...newEvent, name: e.target.value})} className="input-field" required />
+                    <input type="date" value={newEvent.date} onChange={(e) => setNewEvent({...newEvent, date: e.target.value})} className="input-field" required />
+                    <input type="time" value={newEvent.time} onChange={(e) => setNewEvent({...newEvent, time: e.target.value})} className="input-field" required />
+                    <input type="text" placeholder="Venue" value={newEvent.venue} onChange={(e) => setNewEvent({...newEvent, venue: e.target.value})} className="input-field" required />
+                    <textarea placeholder="Description" value={newEvent.description} onChange={(e) => setNewEvent({...newEvent, description: e.target.value})} className="input-field col-span-2" rows="3" required />
+                    <input type="file" accept="image/*" onChange={(e) => setSelectedImage(e.target.files[0])} className="input-field col-span-2" />
+                  </div>
+                  <button type="submit" className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">Create Event</button>
+                </form>
+              )}
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {events.map(event => (
+                  <div key={event.eventId} className={`p-4 border-2 rounded-lg cursor-pointer ${selectedEvent?.eventId === event.eventId ? 'border-blue-600 bg-blue-50' : 'border-gray-200'}`} onClick={() => setSelectedEvent(event)}>
+                    <h3 className="font-semibold">{event.name}</h3>
+                    <p className="text-sm text-gray-600">{new Date(event.date).toLocaleDateString()}</p>
+                    <button onClick={(e) => { e.stopPropagation(); handleDeleteEvent(event.eventId); }} className="mt-2 text-red-600 text-sm hover:underline">Delete</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {selectedEvent && (
+              <>
+                {/* Tabs */}
+                <div className="bg-white rounded-lg shadow mb-6">
+                  <div className="flex border-b">
+                    {['dashboard', 'registrations', 'consultations'].map(tab => (
+                      <button key={tab} onClick={() => setActiveTab(tab)} className={`px-6 py-3 font-medium ${activeTab === tab ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'}`}>
+                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Dashboard Tab */}
+                {activeTab === 'dashboard' && dashboardData && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="bg-white p-6 rounded-lg shadow">
+                        <h3 className="text-gray-600 text-sm">Total Registrations</h3>
+                        <p className="text-3xl font-bold text-blue-600">{dashboardData.data?.statistics?.totalRegistrations || 0}</p>
+                      </div>
+                      <div className="bg-white p-6 rounded-lg shadow">
+                        <h3 className="text-gray-600 text-sm">Checked In</h3>
+                        <p className="text-3xl font-bold text-green-600">{dashboardData.data?.statistics?.checkedIn || 0}</p>
+                      </div>
+                      <div className="bg-white p-6 rounded-lg shadow">
+                        <h3 className="text-gray-600 text-sm">Pending</h3>
+                        <p className="text-3xl font-bold text-yellow-600">{dashboardData.data?.statistics?.pending || 0}</p>
+                      </div>
+                      <div className="bg-white p-6 rounded-lg shadow">
+                        <h3 className="text-gray-600 text-sm">Check-in Rate</h3>
+                        <p className="text-3xl font-bold text-purple-600">{dashboardData.data?.statistics?.checkInRate || 0}%</p>
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow p-6">
+                      <h3 className="text-lg font-semibold mb-4">Recent Registrations</h3>
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full">
+                          <thead><tr className="border-b"><th className="text-left py-2">Name</th><th className="text-left py-2">Email</th><th className="text-left py-2">Ticket</th><th className="text-left py-2">Status</th></tr></thead>
+                          <tbody>{dashboardData.data?.recentRegistrations?.map(reg => (<tr key={reg._id} className="border-b"><td className="py-2">{reg.name}</td><td className="py-2">{reg.email}</td><td className="py-2">{reg.ticketTier}</td><td className="py-2"><span className={`px-2 py-1 rounded text-xs ${reg.isCheckedIn ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{reg.isCheckedIn ? 'Checked In' : 'Pending'}</span></td></tr>))}</tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Registrations Tab */}
+                {activeTab === 'registrations' && (
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-semibold">Registrations</h3>
+                      <button onClick={() => exportData('registrations')} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Export CSV</button>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full">
+                        <thead><tr className="border-b"><th className="text-left py-2">ID</th><th className="text-left py-2">Name</th><th className="text-left py-2">Email</th><th className="text-left py-2">Phone</th><th className="text-left py-2">Status</th><th className="text-left py-2">Action</th></tr></thead>
+                        <tbody>{registrations.map(reg => (<tr key={reg._id} className="border-b"><td className="py-2">{reg.registrationId}</td><td className="py-2">{reg.name}</td><td className="py-2">{reg.email}</td><td className="py-2">{reg.phone}</td><td className="py-2"><span className={`px-2 py-1 rounded text-xs ${reg.isCheckedIn ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{reg.isCheckedIn ? 'Checked In' : 'Pending'}</span></td><td className="py-2">{!reg.isCheckedIn && <button onClick={() => handleCheckIn(reg.registrationId)} className="text-blue-600 hover:underline text-sm">Check In</button>}</td></tr>))}</tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Consultations Tab */}
+                {activeTab === 'consultations' && (
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="text-lg font-semibold mb-4">Consultation Requests</h3>
+                    <div className="space-y-4">
+                      {consultations.map(cons => (
+                        <div key={cons._id} className="border rounded-lg p-4">
+                          <div className="flex justify-between">
+                            <div><h4 className="font-semibold">{cons.name}</h4><p className="text-sm text-gray-600">{cons.email} | {cons.phone}</p><p className="text-sm mt-2">{cons.message}</p></div>
+                            <select value={cons.status} onChange={(e) => updateConsultationStatus(cons._id, e.target.value)} className="h-10 border rounded px-2"><option value="pending">Pending</option><option value="contacted">Contacted</option><option value="completed">Completed</option></select>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>
