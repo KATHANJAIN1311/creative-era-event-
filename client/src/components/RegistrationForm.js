@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { registrationsAPI } from '../utils/api';
 import toast from 'react-hot-toast';
 import { User, Mail, Phone, Loader } from 'lucide-react';
-import axios from 'axios';
 
 const RegistrationForm = ({ event, registrationType = 'online', selectedTier, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -46,13 +45,6 @@ const RegistrationForm = ({ event, registrationType = 'online', selectedTier, on
     setLoading(true);
 
     try {
-      // Fetch CSRF token
-      const csrfRes = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/csrf-token`,
-        { withCredentials: true }
-      );
-      const csrfToken = csrfRes.data.csrfToken;
-      
       const registrationData = {
         ...formData,
         phone: formData.phone.replace(/\D/g, ''),
@@ -62,16 +54,7 @@ const RegistrationForm = ({ event, registrationType = 'online', selectedTier, on
         ticketPrice: getTicketPrice()
       };
 
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/registrations`,
-        registrationData,
-        {
-          headers: {
-            "X-CSRF-Token": csrfToken
-          },
-          withCredentials: true
-        }
-      );
+      const response = await registrationsAPI.create(registrationData);
       
       toast.success(
         registrationType === 'online' 
