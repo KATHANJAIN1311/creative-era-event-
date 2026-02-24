@@ -26,6 +26,7 @@ const Admin = () => {
     ticketTiers: []
   });
   const [selectedImage, setSelectedImage] = useState(null);
+  const [qrCheckInId, setQrCheckInId] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -99,10 +100,13 @@ const Admin = () => {
       const API_URL = rawApi.endsWith('/api') ? rawApi : `${rawApi.replace(/\/$/, '')}/api`;
       const filter = consultationFilter === 'all' ? '' : `?status=${consultationFilter}`;
       const response = await fetch(`${API_URL}/consultations${filter}`, {
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+          'Accept': 'application/json',
+        }
       });
       const data = await response.json();
-      setConsultations(data);
+      setConsultations(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching consultations:', error);
     }
@@ -113,7 +117,10 @@ const Admin = () => {
       const rawApi = process.env.REACT_APP_API_URL;
       const API_URL = rawApi.endsWith('/api') ? rawApi : `${rawApi.replace(/\/$/, '')}/api`;
       const response = await fetch(`${API_URL}/registrations/event/${selectedEvent.eventId}`, {
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+          'Accept': 'application/json',
+        }
       });
       const data = await response.json();
       setRegistrations(Array.isArray(data) ? data : []);
@@ -127,56 +134,106 @@ const Admin = () => {
     try {
       const rawApi = process.env.REACT_APP_API_URL;
       const API_URL = rawApi.endsWith('/api') ? rawApi : `${rawApi.replace(/\/$/, '')}/api`;
-      await fetch(`${API_URL}/consultations/${id}/status`, {
+
+      const response = await fetch(`${API_URL}/consultations/${id}/status`, {
         method: 'PATCH',
-        credentials: 'include',
-        headers: { 
+        mode: 'cors',
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-          'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
+          'Accept': 'application/json',
         },
         body: JSON.stringify({ status })
       });
 
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Server error' }));
+        throw new Error(error.message || 'Failed to update status');
+      }
+
       toast.success('Status updated successfully');
       fetchConsultations();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update status');
+      console.error('Update consultation error:', error);
+      toast.error(error.message || 'Failed to update status');
     }
   };
 
   const handleCheckIn = async (registrationId) => {
     try {
-      if (!registrationId || typeof registrationId !== 'string' || !/^[A-Z0-9]{8}$/.test(registrationId)) {
+      if (!registrationId || typeof registrationId !== 'string') {
         toast.error('Invalid registration ID');
         return;
       }
 
+      const cleanId = registrationId.trim().toUpperCase();
+
+      if (!/^[A-Z0-9]{8}$/.test(cleanId)) {
+        toast.error('Invalid ID format. Must be 8 characters (letters/numbers)');
+        return;
+      }
+
       const rawApi = process.env.REACT_APP_API_URL;
-      const API_URL = rawApi.endsWith('/api') ? rawApi : `${rawApi.replace(/\/$/, '')}/api`;
-      const response = await fetch(`${API_URL}/registrations/${registrationId}/status`, {
+      const API_URL = rawApi.endsWith('/api')
+        ? rawApi
+        : `${rawApi.replace(/\/$/, '')}/api`;
+
+      const url = `${API_URL}/registrations/${cleanId}/status`;
+      console.log('[CHECK-IN] Calling URL:', url);
+
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        toast.error('Session expired. Please login again.');
+        return;
+      }
+
+      const response = await fetch(url, {
         method: 'PATCH',
-        credentials: 'include',
-        headers: { 
+        mode: 'cors',
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-          'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
         },
-        body: JSON.stringify({ status: 'checkedIn' })
-      });    
-      
+        body: JSON.stringify({ status: 'checkedIn' }),
+      });
+
+      console.log('[CHECK-IN] Response status:', response.status);
+
+      let result;
+      try {
+        result = await response.json();
+      } catch {
+        result = { message: 'Server returned invalid response' };
+      }
+
       if (response.ok) {
-        toast.success('User checked in successfully!');
+        toast.success(result.message || 'User checked in successfully!');
         fetchDashboardData(selectedEvent.eventId);
         if (activeTab === 'registrations') {
           fetchRegistrations();
         }
+      } else if (response.status === 401) {
+        toast.error('Session expired. Please login again.');
+        handleLogout();
+      } else if (response.status === 404) {
+        toast.error(`Registration ID "${cleanId}" not found`);
+      } else if (response.status === 400) {
+        toast.error(result.message || 'Invalid request');
       } else {
-        const err = await response.json().catch(() => null);
-        toast.error(err?.message || 'Failed to check in user');
+        toast.error(result.message || 'Failed to check in user');
       }
+
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message || 'Error checking in user');
+      console.error('[CHECK-IN] Error:', error);
+
+      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        toast.error('Cannot reach server. Check your internet connection or the API server may be down.');
+      } else if (error.message.includes('CORS')) {
+        toast.error('CORS error - contact your server administrator');
+      } else {
+        toast.error(error.message || 'Unexpected error during check-in');
+      }
     }
   };
 
@@ -271,7 +328,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+      <div className="w-full px-6 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
@@ -337,6 +394,35 @@ const Admin = () => {
                 {/* Dashboard Tab */}
                 {activeTab === 'dashboard' && dashboardData && (
                   <div className="space-y-6">
+                    {/* QR Check-in Section */}
+                    <div className="bg-white rounded-lg shadow p-6">
+                      <h3 className="text-lg font-semibold mb-4">Quick Check-in by QR ID</h3>
+                      <div className="flex gap-4">
+                        <input
+                          type="text"
+                          placeholder="Enter Registration ID (e.g., ABC12345)"
+                          value={qrCheckInId}
+                          onChange={(e) => setQrCheckInId(e.target.value.toUpperCase())}
+                          className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          maxLength={8}
+                        />
+                        <button
+                          onClick={() => {
+                            if (qrCheckInId) {
+                              handleCheckIn(qrCheckInId);
+                              setQrCheckInId('');
+                            } else {
+                              toast.error('Please enter a registration ID');
+                            }
+                          }}
+                          className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 font-medium"
+                        >
+                          Check In
+                        </button>
+                      </div>
+                      <p className="text-sm text-gray-500 mt-2">Enter the 8-character registration ID from the QR code</p>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div className="bg-white p-6 rounded-lg shadow">
                         <h3 className="text-gray-600 text-sm">Total Registrations</h3>
@@ -391,8 +477,8 @@ const Admin = () => {
                       {consultations.map(cons => (
                         <div key={cons._id} className="border rounded-lg p-4">
                           <div className="flex justify-between">
-                            <div><h4 className="font-semibold">{cons.name}</h4><p className="text-sm text-gray-600">{cons.email} | {cons.phone}</p><p className="text-sm mt-2">{cons.message}</p></div>
-                            <select value={cons.status} onChange={(e) => updateConsultationStatus(cons._id, e.target.value)} className="h-10 border rounded px-2"><option value="pending">Pending</option><option value="contacted">Contacted</option><option value="completed">Completed</option></select>
+                            <div><h4 className="font-semibold">{cons.contact}</h4><p className="text-sm text-gray-600">{cons.email} | {cons.phone}</p><p className="text-sm mt-2">{cons.requirements}</p></div>
+                            <select value={cons.status} onChange={(e) => updateConsultationStatus(cons.consultationId, e.target.value)} className="h-10 border rounded px-2"><option value="pending">Pending</option><option value="completed">Completed</option><option value="checkedIn">Checked In</option></select>
                           </div>
                         </div>
                       ))}
